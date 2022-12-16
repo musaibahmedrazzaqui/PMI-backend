@@ -1,0 +1,14 @@
+#  GET http://localhost:3000/api/user/2
+
+POST http://localhost:3000/api/user/register
+Content-Type: application/json
+
+ {
+        "firstName": "Affan",
+        "lastName": "Mukhtar",
+        "gender": "Male",
+        "emailID": "affan@gmail.com",
+        "password": "iloveallah2",
+        "profileImageUrl": "errrrrrrrr",
+        "dateJoined": "2022-12-12"
+    }

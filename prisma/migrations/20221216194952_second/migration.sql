@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `user` MODIFY `instituteID` INTEGER NOT NULL DEFAULT 1;
