@@ -7,7 +7,7 @@ var token;
 
 users.use(cors());
 
-// process.env.SECRET_KEY = 09f26e402586e2faa8da4c98a35f1b20d6b033c6097befa8be3486a829587fe2f90a832bd3ff9d42710a4da095a2ce285b009f0c3730cd9b8e1af3eb84df6611;
+process.env.SECRET_KEY = "poolmein";
 
 users.post("/register", function (req, res) {
   var today = new Date();
@@ -47,6 +47,7 @@ users.post("/register", function (req, res) {
       appData["error"] = 1;
       appData["data"] = "Internal Server Error";
       res.status(500).json(appData);
+      console.log(err);
     } else {
       connection.query(
         "INSERT INTO user (firstName, lastName, instituteID, levelID, gender, emailID, password, profileImageUrl, dateJoined, isEmailVerified, numOfReferrals) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
@@ -71,7 +72,7 @@ users.post("/register", function (req, res) {
           } else {
             appData["data"] = "Error Occured!";
             res.status(400).json(appData);
-            console.log("in error");
+            console.log(err);
           }
         }
       );
@@ -90,10 +91,10 @@ users.post("/login", function (req, res) {
       appData["error"] = 1;
       appData["data"] = "Internal Server Error";
       res.status(500).json(appData);
-      console.error(err);
+      console.log(err);
     } else {
       connection.query(
-        "SELECT * FROM user WHERE emailID = ?",
+        "SELECT userID, emailID, password FROM user WHERE emailID = ?",
         [emailID],
         function (err, rows, fields) {
           if (err) {
@@ -109,12 +110,13 @@ users.post("/login", function (req, res) {
                   expiresIn: 1440,
                 });
                 appData.error = 0;
+                appData["data"] = rows;
                 res.status(200).json(appData);
                 console.log(rows);
               } else {
                 appData.error = 1;
                 appData["token"] = token;
-                appData["data"] = "Email and Password does not match";
+
                 res.status(200).json(appData);
                 console.log(rows);
               }
@@ -154,28 +156,32 @@ users.use(function (req, res, next) {
   }
 });
 
-users.get("/getUsers", function (req, res) {
+users.get("/:email", function (req, res) {
   var appData = {};
-
+  // var emailID = req.body.emailID;
   database.connection.getConnection(function (err, connection) {
     if (err) {
       appData["error"] = 1;
       appData["data"] = "Internal Server Error";
       res.status(500).json(appData);
     } else {
-      connection.query("SELECT * FROM user", function (err, rows, fields) {
-        if (!err) {
-          appData["error"] = 0;
-          appData["data"] = rows;
-          res.status(200).json(appData);
-          console.log(err);
-        } else {
-          appData["data"] = "No data found";
-          res.status(204).json(appData);
-          console.log(err);
-          console.log(res);
+      connection.query(
+        "SELECT userID FROM user where emailID = ?",
+        [req.params.email],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(err);
+          } else {
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            console.log(res);
+          }
         }
-      });
+      );
       connection.release();
     }
   });

@@ -13,9 +13,15 @@ app.use(
 );
 
 var Users = require("./Routes/Users");
-
+var Driver = require("./Routes/Driver");
+var Vehicle = require("./Routes/Vehicle");
+var Rides = require("./Routes/Rides");
+var Landmarks = require("./Routes/Landmarks");
 app.use("/users", Users);
-
+app.use("/driver", Driver);
+app.use("/vehicle", Vehicle);
+app.use("/rides", Rides);
+app.use("/landmarks", Landmarks);
 var server = app.listen(3002, "localhost", function () {
   var host = server.address().address;
   var port = server.address().port;
