@@ -22,9 +22,8 @@ app.use("/driver", Driver);
 app.use("/vehicle", Vehicle);
 app.use("/rides", Rides);
 app.use("/landmarks", Landmarks);
-var server = app.listen(3002, "0.0.0.0", function () {
-  var host = server.address().address;
-  var port = server.address().port;
 
-  console.log("Example app listening at http://%s:%s", host, port);
+var port = process.env.port || 8000;
+app.listen(port, () => {
+  console.log(`Server running on port: ` + port);
 });
