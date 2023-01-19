@@ -6,8 +6,7 @@ var jwt = require("jsonwebtoken");
 var token;
 
 users.use(cors());
-
-process.env.SECRET_KEY = "poolmein";
+SECRET_KEY = "poolmein";
 
 users.post("/register", function (req, res) {
   var today = new Date();
@@ -106,7 +105,7 @@ users.post("/login", function (req, res) {
           } else {
             if (rows.length > 0) {
               if (rows[0].password == password) {
-                let token = jwt.sign(rows[0], process.env.SECRET_KEY, {
+                let token = jwt.sign(rows[0], SECRET_KEY, {
                   expiresIn: 1440,
                 });
                 appData.error = 0;
