@@ -10,10 +10,10 @@ var mysql = require("mysql");
 // });
 var connection = mysql.createPool({
   connectionLimit: 100,
-  host: "localhost",
-  user: "id20086066_pmi",
-  password: "",
-  database: "id20086066_fyp",
+  host: "poolmein.cuy5i8v0pf3c.ap-northeast-1.rds.amazonaws.com",
+  user: "admin",
+  password: "dasrttsds",
+  database: "fyp",
   port: 3306,
 });
 
