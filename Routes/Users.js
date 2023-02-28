@@ -110,6 +110,7 @@ users.post("/login", function (req, res) {
                 });
                 appData.error = 0;
                 appData["data"] = rows;
+                res.header("Access-Control-Allow-Origin");
                 res.status(200).json(appData);
                 console.log(rows);
               } else {
