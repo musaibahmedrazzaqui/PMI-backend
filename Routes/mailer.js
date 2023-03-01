@@ -26,7 +26,7 @@ mailer.post("/send-email", (req, res) => {
     to: email,
     subject: "Email verification",
     html:
-      '<p>Click<a href="https://pmi-backend-production.up.railway.app/users/verify-email/' +
+      '<p>Click<a href="https://pmi-backend-production.up.railway.app/rides/verify-email/' +
       email +
       '">here</a> to verify your email on the POOL ME IN PLATFORM.</p>',
   };

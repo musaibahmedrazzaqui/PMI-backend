@@ -157,7 +157,7 @@ users.use(function (req, res, next) {
     res.status(403).json(appData);
   }
 });
-users.get("/hello/:email", function (req, res) {
+users.get("/verify-email/:email", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;
   console.log("ooper");
@@ -180,7 +180,7 @@ users.get("/hello/:email", function (req, res) {
     } else {
       console.log("HERE");
       connection.query(
-        "UPDATE user SET isEmailVerified=1 WHERE userID=?",
+        "UPDATE user SET isEmailVerified=1 WHERE email=?",
         [req.params.email],
         function (err, rows, fields) {
           if (!err) {
@@ -201,8 +201,9 @@ users.get("/hello/:email", function (req, res) {
     }
   });
 });
-users.get("/:email", function (req, res) {
+users.get("/id", function (req, res) {
   var appData = {};
+  console.log("sdaaaaaaaaa");
   // var emailID = req.body.emailID;
   database.connection.getConnection(function (err, connection) {
     if (err) {
@@ -211,14 +212,14 @@ users.get("/:email", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT userID FROM user where emailID = ?",
-        [req.params.email],
+        "SELECT * FROM user where userID = 14",
+        [req.params.id],
         function (err, rows, fields) {
           if (!err) {
             appData["error"] = 0;
             appData["data"] = rows;
             res.status(200).json(appData);
-            console.log(err);
+            console.log(rows);
           } else {
             appData["data"] = "No data found";
             res.status(204).json(appData);
