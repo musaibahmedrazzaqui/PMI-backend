@@ -268,7 +268,7 @@ rides.get("/checkifleft/:id", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT 	SELECT * FROM rideinfo where StatusID=1 AND PassengerID=?",
+        "SELECT * FROM rideinfo where StatusID=1 AND PassengerID=?",
         [req.params.id],
         function (err, rows, fields) {
           if (!err) {
