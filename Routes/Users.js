@@ -40,6 +40,7 @@ users.post("/register", function (req, res) {
   const dateJoined = "2022-12-22";
   const isEmailVerified = 0;
   const numOfReferrals = 0;
+  const phone = req.body.phone;
   database.connection.getConnection(function (err, connection) {
     console.log(userData);
     if (err) {
@@ -49,7 +50,7 @@ users.post("/register", function (req, res) {
       console.log(err);
     } else {
       connection.query(
-        "INSERT INTO user (firstName, lastName, instituteID, levelID, gender, emailID, password, profileImageUrl, dateJoined, isEmailVerified, numOfReferrals) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO user (firstName, lastName, instituteID, levelID, gender, emailID, password, profileImageUrl, dateJoined, isEmailVerified, numOfReferrals,phone) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
         [
           firstName,
           lastName,
@@ -62,6 +63,7 @@ users.post("/register", function (req, res) {
           dateJoined,
           isEmailVerified,
           numOfReferrals,
+          phone,
         ],
         function (err, rows, fields) {
           if (!err) {
@@ -178,7 +180,7 @@ users.get("/verify-email/:email", function (req, res) {
     } else {
       console.log("HERE");
       connection.query(
-        "UPDATE user SET isEmailVerified=1 WHERE emailID=?",
+        "UPDATE user SET isEmailVerified=1 WHERE userID=23?",
         [req.params.email],
         function (err, rows, fields) {
           if (!err) {
