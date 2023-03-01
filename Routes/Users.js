@@ -166,15 +166,16 @@ users.get("/verify-email/:email", function (req, res) {
   // const email = req.body.email;
 
   database.connection.getConnection(function (err, connection) {
-    console.log(userData);
+    // console.log(userData);
     if (err) {
       appData["error"] = 1;
       appData["data"] = "Internal Server Error";
       res.status(500).json(appData);
       console.log(appData);
     } else {
+      console.log("HERE");
       connection.query(
-        "UPDATE users SET isEmailVerified=1 WHERE emailID=?",
+        "UPDATE user SET isEmailVerified=1 WHERE emailID=`{}`",
         [req.params.email],
         function (err, rows, fields) {
           if (!err) {
