@@ -155,6 +155,47 @@ rides.post("/driverlocationto", function (req, res) {
     }
   });
 });
+rides.post("/accept", function (req, res) {
+  //   var today = new Date();
+  //   var isEmailVerified = 1;
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  // const userID = 2;
+  const RideID = req.body.RideID;
+  const PassengerID = req.body.PassengerID;
+  const DriverID = req.body.DriverID;
+  const status = 1;
+  const fareDecided = req.body.fare;
+  // const to_driverID = req.body.to_driverID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(appData);
+    } else {
+      connection.query(
+        "INSERT INTO rideinfo (RideID, PassengerID, DriverID, StatusID, fareDecided) VALUES (?,?,?,?,?)",
+        [RideID, PassengerID, DriverID, status, fareDecided],
+        function (err, rows, fields) {
+          if (!err) {
+            appData.error = 0;
+            appData["data"] = "Ride started!!";
+            res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 rides.get("/:id", function (req, res) {
   var appData = {};
   // var emailID = req.body.emailID;
@@ -204,6 +245,39 @@ rides.get("/getrides/:id", function (req, res) {
             appData["data"] = rows;
             res.status(200).json(appData);
             console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.get("/checkifleft/:id", function (req, res) {
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT 	SELECT * FROM rideinfo where StatusID=1 AND PassengerID=?",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            if (rows.length > 0) {
+              appData["error"] = 0;
+              appData["data"] = "Driver left!";
+              res.status(200).json(appData);
+              console.log(rows);
+            }
           } else {
             appData["error"] = 1;
             appData["data"] = "No data found";
