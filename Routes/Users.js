@@ -95,7 +95,7 @@ users.post("/login", function (req, res) {
       console.log(err);
     } else {
       connection.query(
-        "SELECT userID, emailID, password FROM user WHERE emailID = ?",
+        "SELECT userID, emailID, password, isEmailVerified FROM user WHERE emailID = ?",
         [emailID],
         function (err, rows, fields) {
           if (err) {
@@ -106,21 +106,28 @@ users.post("/login", function (req, res) {
             console.log(err);
           } else {
             if (rows.length > 0) {
-              if (rows[0].password == password) {
-                let token = jwt.sign(rows[0], SECRET_KEY, {
-                  expiresIn: 1440,
-                });
-                appData.error = 0;
-                appData["data"] = rows;
-                res.header("Access-Control-Allow-Origin");
-                res.status(200).json(appData);
-                console.log(rows);
-              } else {
-                appData.error = 1;
-                appData["token"] = token;
+              if (rows[0].isEmailVerified == 1) {
+                if (rows[0].password == password) {
+                  let token = jwt.sign(rows[0], SECRET_KEY, {
+                    expiresIn: 1440,
+                  });
+                  appData.error = 0;
+                  appData["data"] = rows;
+                  res.header("Access-Control-Allow-Origin");
+                  res.status(200).json(appData);
+                  console.log(rows);
+                } else {
+                  appData.error = 1;
+                  appData["token"] = token;
 
-                res.status(200).json(appData);
-                console.log(rows);
+                  res.status(200).json(appData);
+                  console.log(rows);
+                }
+              } else {
+                appData.error = 3;
+                appData["data"] = "Not verified email";
+                res.status(500).json(appData);
+                console.log(appData.data);
               }
             } else {
               appData.error = 2;
