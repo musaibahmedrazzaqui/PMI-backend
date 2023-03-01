@@ -167,7 +167,7 @@ rides.post("/accept", function (req, res) {
   const PassengerID = req.body.PassengerID;
   const DriverID = req.body.DriverID;
   const status = 1;
-  const fareDecided = req.body.fare;
+  const fareDecided = req.body.fareDecided;
   // const to_driverID = req.body.to_driverID;
   database.connection.getConnection(function (err, connection) {
     if (err) {
