@@ -180,7 +180,7 @@ users.get("/verify-email/:email", function (req, res) {
     } else {
       console.log("HERE");
       connection.query(
-        "UPDATE user SET isEmailVerified=1 WHERE userID=23?",
+        "UPDATE user SET isEmailVerified=1 WHERE userID=?",
         [req.params.email],
         function (err, rows, fields) {
           if (!err) {
