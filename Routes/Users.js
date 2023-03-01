@@ -168,6 +168,7 @@ users.get("/verify-email/:email", function (req, res) {
   database.connection.getConnection(function (err, connection) {
     // console.log(userData);
     if (err) {
+      console.log("in error");
       appData["error"] = 1;
       appData["data"] = "Internal Server Error";
       res.status(500).json(appData);
@@ -179,11 +180,13 @@ users.get("/verify-email/:email", function (req, res) {
         [req.params.email],
         function (err, rows, fields) {
           if (!err) {
+            console.log("in first");
             appData.error = 0;
             appData["data"] = "Row updated!";
             res.status(201).json(appData);
             console.log(appData);
           } else {
+            console.log("in second");
             appData["data"] = "Error Occured!";
             res.status(400).json(appData);
             console.log(err);
