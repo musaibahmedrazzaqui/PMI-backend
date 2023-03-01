@@ -25,7 +25,7 @@ users.post("/register", function (req, res) {
     password: req.body.password,
     profileImageUrl: "ss",
     dateJoined: today,
-    isEmailVerified: 1,
+    isEmailVerified: 0,
     numOfReferrals: 0,
   };
   // const userID = 2;
@@ -38,7 +38,7 @@ users.post("/register", function (req, res) {
   const password = req.body.password;
   const profileImageUrl = "ss";
   const dateJoined = "2022-12-22";
-  const isEmailVerified = 1;
+  const isEmailVerified = 0;
   const numOfReferrals = 0;
   database.connection.getConnection(function (err, connection) {
     console.log(userData);
@@ -155,7 +155,44 @@ users.use(function (req, res, next) {
     res.status(403).json(appData);
   }
 });
+users.get("/verify-email/:email", function (req, res) {
+  //   var today = new Date();
+  //   var isEmailVerified = 1;
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  // const userID = 2;
+  // const email = req.body.email;
 
+  database.connection.getConnection(function (err, connection) {
+    console.log(userData);
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(appData);
+    } else {
+      connection.query(
+        "UPDATE users SET isEmailVerified=1 WHERE emailID=?",
+        [req.params.email],
+        function (err, rows, fields) {
+          if (!err) {
+            appData.error = 0;
+            appData["data"] = "Row updated!";
+            res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 users.get("/:email", function (req, res) {
   var appData = {};
   // var emailID = req.body.emailID;

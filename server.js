@@ -11,12 +11,13 @@ app.use(
     extended: false,
   })
 );
-
+var Mailer = require("./Routes/mailer");
 var Users = require("./Routes/Users");
 var Driver = require("./Routes/Driver");
 var Vehicle = require("./Routes/Vehicle");
 var Rides = require("./Routes/Rides");
 var Landmarks = require("./Routes/Landmarks");
+app.use("/mailer", Mailer);
 app.use("/users", Users);
 app.use("/driver", Driver);
 app.use("/vehicle", Vehicle);
