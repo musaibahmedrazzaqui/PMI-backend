@@ -158,10 +158,12 @@ users.use(function (req, res, next) {
 users.get("/verify-email/:email", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;
+  console.log("ooper");
   var appData = {
     error: 1,
     data: "",
   };
+  console.log("neeche");
   // const userID = 2;
   // const email = req.body.email;
 
