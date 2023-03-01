@@ -259,7 +259,9 @@ rides.get("/getrides/:id", function (req, res) {
   });
 });
 rides.get("/checkifleft/:id", function (req, res) {
+  console.log("Sd");
   var appData = {};
+  // console.log("checkifleft");
   // var emailID = req.body.emailID;
   database.connection.getConnection(function (err, connection) {
     if (err) {
@@ -274,9 +276,14 @@ rides.get("/checkifleft/:id", function (req, res) {
           if (!err) {
             if (rows.length > 0) {
               appData["error"] = 0;
-              appData["data"] = rows;
+              appData["data"] = "Rider has left";
               res.status(200).json(appData);
-              console.log(rows);
+              console.log(appData);
+            } else {
+              appData["error"] = 1;
+              appData["data"] = "No data found";
+              res.status(200).json(appData);
+              console.log(appData);
             }
           } else {
             appData["error"] = 1;
