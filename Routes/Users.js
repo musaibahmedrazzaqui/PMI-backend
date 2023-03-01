@@ -157,7 +157,7 @@ users.use(function (req, res, next) {
     res.status(403).json(appData);
   }
 });
-users.get("/verify-email/:email", function (req, res) {
+users.get("/hello/:email", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;
   console.log("ooper");
