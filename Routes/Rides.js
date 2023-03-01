@@ -274,7 +274,7 @@ rides.get("/checkifleft/:id", function (req, res) {
           if (!err) {
             if (rows.length > 0) {
               appData["error"] = 0;
-              appData["data"] = "Driver left!";
+              appData["data"] = rows;
               res.status(200).json(appData);
               console.log(rows);
             }
