@@ -131,6 +131,7 @@ users.post("/register", function (req, res) {
             appData["data"] = "Error Occused";
             res.status(400).json(appData);
           } else {
+            console.log(rows);
             if (rows.length > 0) {
               appData.error = 2;
               appData["data"] = "Email already exists";
