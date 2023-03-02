@@ -58,11 +58,11 @@ users.post("/register", function (req, res) {
             appData["data"] = "Error Occused";
             res.status(400).json(appData);
           } else {
-            console.log(rows);
             if (rows.length > 0) {
+              console.log(rows);
               appData.error = 2;
               appData["data"] = "Email already exists";
-              res.status(400).json(appData);
+              res.status(201).json(appData);
             } else {
               connection.query(
                 "INSERT INTO user (firstName, lastName, instituteID, levelID, gender, emailID, password, profileImageUrl, dateJoined, isEmailVerified, numOfReferrals,phone) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
