@@ -81,7 +81,97 @@ users.post("/register", function (req, res) {
     }
   });
 });
-
+users.post("/register", function (req, res) {
+  var today = new Date();
+  //   var isEmailVerified = 1;
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  var userData = {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    insitituteID: 1,
+    levelID: 1,
+    gender: req.body.gender,
+    emailID: req.body.emailID,
+    password: req.body.password,
+    profileImageUrl: "ss",
+    dateJoined: today,
+    isEmailVerified: 0,
+    numOfReferrals: 0,
+  };
+  // const userID = 2;
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  const insitituteID = 1;
+  const levelID = 1;
+  const gender = req.body.gender;
+  const emailID = req.body.emailID;
+  const password = req.body.password;
+  const profileImageUrl = "ss";
+  const dateJoined = "2022-12-22";
+  const isEmailVerified = 0;
+  const numOfReferrals = 0;
+  const phone = req.body.phone;
+  database.connection.getConnection(function (err, connection) {
+    console.log(userData);
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(err);
+    } else {
+      connection.query(
+        "SELECT * FROM user where emailID=?",
+        [emailID],
+        function (err, rows, fields) {
+          if (err) {
+            appData.error = 1;
+            appData["data"] = "Error Occused";
+            res.status(400).json(appData);
+          } else {
+            if (rows.length > 0) {
+              appData.error = 2;
+              appData["data"] = "Email already exists";
+              res.status(400).json(appData);
+            } else {
+              connection.query(
+                "INSERT INTO user (firstName, lastName, instituteID, levelID, gender, emailID, password, profileImageUrl, dateJoined, isEmailVerified, numOfReferrals,phone) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                [
+                  firstName,
+                  lastName,
+                  insitituteID,
+                  levelID,
+                  gender,
+                  emailID,
+                  password,
+                  profileImageUrl,
+                  dateJoined,
+                  isEmailVerified,
+                  numOfReferrals,
+                  phone,
+                ],
+                function (err, rows, fields) {
+                  if (!err) {
+                    appData.error = 0;
+                    appData["data"] = "User registered successfully!";
+                    res.status(201).json(appData);
+                  } else {
+                    appData["data"] = "Error Occured!";
+                    res.status(400).json(appData);
+                    console.log(err);
+                  }
+                }
+              );
+              connection.release();
+            }
+          }
+        }
+      );
+    }
+  });
+});
 users.post("/login", function (req, res) {
   var appData = {};
   var emailID = req.body.emailID;
