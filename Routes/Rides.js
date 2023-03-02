@@ -342,6 +342,7 @@ rides.get("/checkifleft/:id", function (req, res) {
     }
   });
 });
+
 rides.post("/addnegotiation", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;
@@ -389,7 +390,7 @@ rides.post("/addnegotiation", function (req, res) {
         function (err, rows, fields) {
           if (!err) {
             appData.error = 0;
-            appData["data"] = "Requst Sent successfully!";
+            appData["data"] = "Request Sent successfully!";
             res.status(201).json(appData);
             console.log(appData);
           } else {
@@ -417,6 +418,37 @@ rides.get("/riderequests/:driveruserid", function (req, res) {
         [req.params.driveruserid],
         function (err, rows, fields) {
           if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(err);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.get("/forably/:id", function (req, res) {
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT rideinfo.RideID, rideinfo.PassengerID,rideinfo.DriverID,rideinfo.fareDecided, user.firstName, user.lastName,user.phone,driver_location_to.to_latitude as DestLat,driver_location_to.to_longitude as DestLong,driver_location_to.to_location as DestLocation FROM rideinfo join user on user.userID=rideinfo.DriverID join driver_location_to on rideinfo.DriverID=driver_location_to.to_driverUserId where rideinfo.StatusID=1 and rideinfo.PassengerID=?",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (rows.length > 0) {
             appData["error"] = 0;
             appData["data"] = rows;
             res.status(200).json(appData);
