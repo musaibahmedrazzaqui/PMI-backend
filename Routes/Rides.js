@@ -271,6 +271,43 @@ rides.get("/verify-email/:email", function (req, res) {
     }
   });
 });
+rides.get("/checkforrequest/:id/:rideid", function (req, res) {
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT * from ridenegotiation  where userID = ? and rideID =?",
+        [req.params.id, req.params.rideid],
+        function (err, rows, fields) {
+          if (!err) {
+            if (rows.length > 0) {
+              appData["error"] = 2;
+              appData["data"] = "Already sent request for this ride";
+              res.status(200).json(appData);
+            } else {
+              appData["error"] = 0;
+              appData["data"] = "Allowed!";
+              res.status(200).json(appData);
+            }
+            // console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 rides.get("/getrides/:id", function (req, res) {
   var appData = {};
   // var emailID = req.body.emailID;
@@ -414,14 +451,35 @@ rides.get("/riderequests/:driveruserid", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT driver.driverID, driver.DriverUserID, ridenegotiation.driverFare, ridenegotiation.userFare, ride.RideID, ridenegotiation.location,user.userid, user.firstName, user.lastName, ridenegotiation.latitude,ridenegotiation.longitude, driver_location.latitude as dLatitude, driver_location.longitude as drLongitude, driver_location.location as DriverfLocation,driver_location_to.to_longitude,driver_location_to.to_latitude, driver_location_to.to_location FROM driver join ride ON driver.DriverID = ride.DriverID join ridenegotiation on ridenegotiation.rideID = ride.RideID join user on ridenegotiation.userid = user.userID join driver_location ON ride.DriverID=driver_location.driverID join driver_location_to ON ride.DriverID = driver_location_to.to_driverID where driver.DriverUserID = ?",
+        "SELECT driver.driverID, driver.DriverUserID, ridenegotiation.driverFare, ridenegotiation.userID, ridenegotiation.userFare, ride.RideID, ridenegotiation.location,user.userid, user.firstName, user.lastName, ridenegotiation.latitude,ridenegotiation.longitude, driver_location.latitude as dLatitude, driver_location.longitude as drLongitude, driver_location.location as DriverfLocation,driver_location_to.to_longitude,driver_location_to.to_latitude, driver_location_to.to_location FROM driver join ride ON driver.DriverID = ride.DriverID join ridenegotiation on ridenegotiation.rideID = ride.RideID join user on ridenegotiation.userid = user.userID join driver_location ON ride.DriverID=driver_location.driverID join driver_location_to ON ride.DriverID = driver_location_to.to_driverID where driver.DriverUserID = ?",
         [req.params.driveruserid],
         function (err, rows, fields) {
           if (!err) {
             appData["error"] = 0;
-            appData["data"] = rows;
-            res.status(200).json(appData);
-            console.log(err);
+
+            // console.log(rows[0].RideID);
+            // console.log(rows[0].userID);
+            for (let i = 0; i < rows.length; i++) {
+              // console.log(rows[0].RideID);
+              connection.query(
+                "Select * from rideinfo where RideID = ? and StatusID =1 and PassengerID =?",
+                [rows[i].RideID, rows[i].userID],
+                function (err, rowstwo, fields) {
+                  if (!err) {
+                    if (rowstwo.length > 0) {
+                      console.log(rows);
+                      rows.splice(i, 1);
+                      console.log("After splice", rows);
+
+                      console.log("This is ending", rows);
+                      appData["data"] = rows;
+                      res.status(200).json(appData);
+                    }
+                  }
+                }
+              );
+            }
+            // console.log(err);
           } else {
             appData["error"] = 1;
             appData["data"] = "No data found";
