@@ -474,6 +474,9 @@ rides.get("/riderequests/:driveruserid", function (req, res) {
                       console.log("This is ending", rows);
                       appData["data"] = rows;
                       res.status(200).json(appData);
+                    } else {
+                      appData["data"] = rows;
+                      res.status(200).json(appData);
                     }
                   }
                 }

@@ -10,7 +10,7 @@ var mysql = require("mysql");
 // });
 var connection = mysql.createPool({
   connectionLimit: 100,
-  host: "poolmein.cuy5i8v0pf3c.ap-northeast-1.rds.amazonaws.com",
+  host: "pmifyp.cmo3hj1bmcvt.ap-northeast-1.rds.amazonaws.com",
   user: "admin",
   password: "dasrttsds",
   database: "fyp",
