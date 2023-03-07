@@ -16,6 +16,7 @@ rides.post("/addnew", function (req, res) {
   const numberOfPeople = req.body.numberOfPeople;
   const fareEntered = req.body.fareEntered;
   const vehicleID = req.body.vehicleID;
+  const status = 0;
   var userData = {
     DriverID: req.body.DriverID,
     numberOfPeople: req.body.numberOfPeople,
@@ -31,8 +32,8 @@ rides.post("/addnew", function (req, res) {
       console.log(appData);
     } else {
       connection.query(
-        "INSERT INTO ride (DriverID, numberOfPeople, fareEntered, vehicleID) VALUES (?,?,?,?)",
-        [DriverID, numberOfPeople, fareEntered, vehicleID],
+        "INSERT INTO ride (DriverID, numberOfPeople, fareEntered, vehicleID,status) VALUES (?,?,?,?,?)",
+        [DriverID, numberOfPeople, fareEntered, vehicleID, status],
         function (err, rows, fields) {
           if (!err) {
             appData.error = 0;
@@ -206,11 +207,12 @@ rides.get("/:id", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT * FROM ride where DriverID = ?",
+        "SELECT * FROM ride join driver on ride.DriverID = driver.DriverID where ride.status=0 and driver.DriverUserID = ?",
         [req.params.id],
         function (err, rows, fields) {
           if (!err) {
             appData["error"] = 0;
+            console.log("DriverAcceptedRides", rows);
             appData["data"] = rows;
             res.status(200).json(appData);
             console.log(err);
@@ -484,6 +486,47 @@ rides.get("/riderequests/:driveruserid", function (req, res) {
             }
             // console.log(err);
           } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.get("/driveracceptedrides/:driveruserid/:rideid", function (req, res) {
+  var appData = {};
+  console.log("req", req.params);
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT rideinfo.RideID,rideinfo.DriverID,rideinfo.PassengerID, ride.numberOfPeople, ride.fareEntered, rideinfo.fareDecided,user.firstName as PassengerFName,user.lastName as PassengerLName FROM rideinfo join ride on rideinfo.RideID =ride.RideID join user on rideinfo.PassengerID =user.userID where rideinfo.RideID=? and rideinfo.DriverID=?",
+        [req.params.rideid, req.params.driveruserid],
+
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+
+            // console.log(rows[0].RideID);
+            // console.log(rows[0].userID);
+
+            console.log("rows", rows);
+
+            appData["data"] = rows;
+            res.status(200).json(appData);
+          }
+
+          // console.log(err);
+          else {
             appData["error"] = 1;
             appData["data"] = "No data found";
             res.status(204).json(appData);
