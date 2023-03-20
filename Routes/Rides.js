@@ -519,7 +519,7 @@ rides.get("/driveracceptedrides/:driveruserid/:rideid", function (req, res) {
             // console.log(rows[0].RideID);
             // console.log(rows[0].userID);
 
-            console.log("rows", rows);
+            console.log("rowssss", rows);
 
             appData["data"] = rows;
             res.status(200).json(appData);
