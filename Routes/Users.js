@@ -135,8 +135,8 @@ users.post("/login", function (req, res) {
                   res.status(200).json(appData);
                   console.log(rows);
                 } else {
-                  appData.error = 1;
-                  appData["token"] = token;
+                  appData.error = 0;
+                  appData["data"] = rows;
 
                   res.status(200).json(appData);
                   console.log("rows in else block", rows);
