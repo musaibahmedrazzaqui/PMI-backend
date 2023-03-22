@@ -139,7 +139,7 @@ users.post("/login", function (req, res) {
                   appData["token"] = token;
 
                   res.status(200).json(appData);
-                  console.log(rows);
+                  console.log("rows in else block", rows);
                 }
               } else {
                 appData.error = 3;
