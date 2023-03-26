@@ -49,7 +49,7 @@ landmarks.get("/:lat/:long", function (req, res) {
             const min = calcdistance.indexOf(Math.min(...calcdistance));
             appData["latitude"] = rows[min].Latitude;
             appData["longitude"] = rows[min].Longitude;
-            appData["place name"] = rows[min].Name;
+            appData["placename"] = rows[min].Name;
             appData["distance in kilometers"] = Math.min(...calcdistance);
             res.status(200).json(appData);
             // console.log(appData.data);
