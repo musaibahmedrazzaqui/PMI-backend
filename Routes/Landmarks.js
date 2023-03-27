@@ -50,7 +50,7 @@ landmarks.get("/:lat/:long", function (req, res) {
             appData["latitude"] = rows[min].Latitude;
             appData["longitude"] = rows[min].Longitude;
             appData["placename"] = rows[min].Name;
-            appData["distance in kilometers"] = Math.min(...calcdistance);
+            appData["distance"] = Math.min(...calcdistance);
             res.status(200).json(appData);
             // console.log(appData.data);
           } else {
