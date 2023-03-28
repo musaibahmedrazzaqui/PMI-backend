@@ -37,7 +37,8 @@ rides.post("/addnew", function (req, res) {
         function (err, rows, fields) {
           if (!err) {
             appData.error = 0;
-            appData["data"] = "Ride Added successfully!";
+            console.log(rows.insertId);
+            appData["data"] = rows.insertId;
             res.status(201).json(appData);
             console.log(appData);
           } else {
