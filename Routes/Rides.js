@@ -644,7 +644,7 @@ rides.get("/updatestatusride/:rid", function (req, res) {
     } else {
       console.log("HERE");
       connection.query(
-        "UPDATE ride SET StatusID=1 WHERE RideID=?",
+        "UPDATE ride SET status=1 WHERE RideID=?",
         [req.params.rid],
         function (err, rows, fields) {
           if (!err) {
