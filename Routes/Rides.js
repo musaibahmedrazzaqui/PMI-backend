@@ -623,6 +623,48 @@ rides.get("/updatestatusdest/:puid/:rid", function (req, res) {
     }
   });
 });
+rides.get("/updatestatusride/:rid", function (req, res) {
+  // console.log("ooper");
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  console.log("neeche");
+  // const userID = 2;
+  // const email = req.body.email;
+
+  database.connection.getConnection(function (err, connection) {
+    // console.log(userData);
+    if (err) {
+      console.log("in error");
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(appData);
+    } else {
+      console.log("HERE");
+      connection.query(
+        "UPDATE ride SET StatusID=1 WHERE RideID=?",
+        [req.params.rid],
+        function (err, rows, fields) {
+          if (!err) {
+            console.log("in first");
+            appData.error = 0;
+            appData["data"] = "Row updated!";
+            res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            console.log("in second");
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 rides.get("/forably/:id", function (req, res) {
   var appData = {};
   // var emailID = req.body.emailID;
