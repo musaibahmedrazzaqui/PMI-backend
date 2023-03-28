@@ -61,6 +61,7 @@ rides.post("/driverlocation", function (req, res) {
     data: "",
   };
   // const userID = 2;
+  const RideID = req.body.RideID;
   const latitude = req.body.latitude;
   const longitude = req.body.longitude;
   const driverUserId = req.body.driverUserId;
@@ -84,8 +85,8 @@ rides.post("/driverlocation", function (req, res) {
       console.log(appData);
     } else {
       connection.query(
-        "INSERT INTO driver_location (latitude, longitude, driverUserId, status, driverID, location) VALUES (?,?,?,?,?,?)",
-        [latitude, longitude, driverUserId, status, driverID, location],
+        "INSERT INTO driver_location (latitude, longitude, driverUserId, status, driverID, location, RideID) VALUES (?,?,?,?,?,?,?)",
+        [latitude, longitude, driverUserId, status, driverID, location, RideID],
         function (err, rows, fields) {
           if (!err) {
             appData.error = 0;
@@ -111,6 +112,7 @@ rides.post("/driverlocationto", function (req, res) {
     data: "",
   };
   // const userID = 2;
+  const RideID = req.body.RideID;
   const to_latitude = req.body.to_latitude;
   const to_longitude = req.body.to_longitude;
   const to_driverUserId = req.body.to_driverUserId;
@@ -131,7 +133,7 @@ rides.post("/driverlocationto", function (req, res) {
       console.log(appData);
     } else {
       connection.query(
-        "INSERT INTO driver_location_to (to_latitude, to_longitude, to_driverUserId, to_status, to_location, to_driverID) VALUES (?,?,?,?,?,?)",
+        "INSERT INTO driver_location_to (to_latitude, to_longitude, to_driverUserId, to_status, to_location, to_driverID, RideID) VALUES (?,?,?,?,?,?,?)",
         [
           to_latitude,
           to_longitude,
@@ -139,6 +141,7 @@ rides.post("/driverlocationto", function (req, res) {
           to_status,
           to_location,
           to_driverID,
+          RideID,
         ],
         function (err, rows, fields) {
           if (!err) {
