@@ -226,7 +226,7 @@ users.get("/verify-email/:email", function (req, res) {
     }
   });
 });
-users.get("/id", function (req, res) {
+users.get("/getName/:id", function (req, res) {
   var appData = {};
   console.log("sdaaaaaaaaa");
   // var emailID = req.body.emailID;
@@ -234,10 +234,11 @@ users.get("/id", function (req, res) {
     if (err) {
       appData["error"] = 1;
       appData["data"] = "Internal Server Error";
+      console.log("sdaaaaaaaaa");
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT * FROM user where userID = 14",
+        "SELECT * FROM user where userID = ?",
         [req.params.id],
         function (err, rows, fields) {
           if (!err) {

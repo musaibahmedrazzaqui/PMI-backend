@@ -2,8 +2,16 @@ var express = require("express");
 var landmarks = express.Router();
 var database = require("../Database/database");
 var cors = require("cors");
+const Pusher = require("pusher");
 
 landmarks.use(cors());
+const pusher = new Pusher({
+  appId: "1582876",
+  key: "6bef1447bb8ee1d2d03f",
+  secret: "c893dc43c9827e897393",
+  cluster: "ap2",
+  useTLS: true,
+});
 function distance(lat1, lon1, lat2, lon2, name) {
   var p = 0.017453292519943295; // Math.PI / 180
   var c = Math.cos;
@@ -59,6 +67,92 @@ landmarks.get("/:lat/:long", function (req, res) {
             res.status(204).json(appData);
             console.log(err);
             // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+landmarks.post("/notification", (req, res) => {
+  const idx = req.body.idx;
+  console.log("ooper");
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  console.log("neeche");
+  // const userID = 2;
+  // const email = req.body.email;
+
+  database.connection.getConnection(function (err, connection) {
+    // console.log(userData);
+    if (err) {
+      console.log("in error");
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(appData);
+    } else {
+      console.log("HERE");
+      connection.query(
+        "UPDATE ridereqpassenger SET status=1 WHERE idridereqpassenger=?",
+        [idx],
+        function (err, rows, fields) {
+          if (!err) {
+            console.log("in first");
+            appData.error = 0;
+            appData["data"] = "Row updated!";
+            res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            console.log("in second");
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+landmarks.post("/notificationtwo", (req, res) => {
+  const idx = req.body.idx;
+  console.log("ooper");
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  console.log("neeche");
+  // const userID = 2;
+  // const email = req.body.email;
+
+  database.connection.getConnection(function (err, connection) {
+    // console.log(userData);
+    if (err) {
+      console.log("in error");
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(appData);
+    } else {
+      console.log("HERE");
+      connection.query(
+        "UPDATE ridereqpassenger SET status=-1 WHERE idridereqpassenger=?",
+        [idx],
+        function (err, rows, fields) {
+          if (!err) {
+            console.log("in first");
+            appData.error = 0;
+            appData["data"] = "Row updated!";
+            res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            console.log("in second");
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
+            console.log(err);
           }
         }
       );

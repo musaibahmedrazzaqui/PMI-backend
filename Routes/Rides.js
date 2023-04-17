@@ -4,6 +4,209 @@ var database = require("../Database/database");
 var cors = require("cors");
 
 rides.use(cors());
+setInterval(() => {
+  const deleteQuery =
+    "DELETE FROM passengerrides WHERE createdAt < NOW() - INTERVAL 30 MINUTE";
+  // const deleteSecondQuery =
+  //   "DELETE FROM ridereqpassenger WHERE createdAt < NOW() - INTERVAL 3 MINUTE";
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      console.log(err);
+    } else {
+      connection.query(deleteQuery, (error, results, fields) => {
+        if (error) throw error;
+        console.log(`Deleted passengerrides ${results} rows`);
+      });
+      // connection.query(deleteSecondQuery, (error, results, fields) => {
+      //   if (error) throw error;
+      //   console.log(`Deleted ridereqpassenger ${results} rows`);
+      // });
+    }
+  });
+}, 60000 * 5);
+rides.post("/passengercreateride", function (req, res) {
+  //   var today = new Date();
+  //   var isEmailVerified = 1;
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  // const userID = 2;
+  const userID = req.body.userID;
+
+  const latitude = req.body.latitude;
+  const longitude = req.body.longitude;
+  const location = req.body.location;
+  const to_latitude = req.body.to_latitude;
+  const to_longitude = req.body.to_longitude;
+  const to_location = req.body.to_location;
+  // const status = 0;
+
+  database.connection.getConnection(function (err, connection) {
+    // console.log(userData);
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(appData);
+    } else {
+      connection.query(
+        "INSERT INTO passengerrides (userID, latitude, longitude, location,to_latitude,to_longitude,to_location,createdAt) VALUES (?,?,?,?,?,?,?,NOW())",
+        [
+          userID,
+          latitude,
+          longitude,
+          location,
+          to_latitude,
+          to_longitude,
+          to_location,
+        ],
+        function (err, rows, fields) {
+          if (!err) {
+            appData.error = 0;
+            console.log(rows.insertId);
+            appData["data"] = rows.insertId;
+            res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.get("/getpassengerrides/:id", function (req, res) {
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT * FROM passengerrides join user on passengerrides.userID=user.userID where passengerrides.userID!=?",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.post("/driverequestride", function (req, res) {
+  //   var today = new Date();
+  //   var isEmailVerified = 1;
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  // const userID = 2;
+  const userID = req.body.userID;
+
+  const pickup = req.body.pickuplocation;
+  const destination = req.body.destination;
+  const from_lat = req.body.from_lat;
+  const from_long = req.body.from_long;
+  const to_lat = req.body.to_lat;
+  const to_long = req.body.to_long;
+  const driveruserid = req.body.driveruserid;
+  const passengeruserid = req.body.passengeruserid;
+  const fare = req.body.fare;
+  const idpassengerrides = req.body.idpassengerrides;
+  const vehicleID = req.body.vehicleID;
+  const status = 0;
+  const time = req.body.time;
+  database.connection.getConnection(function (err, connection) {
+    // console.log(userData);
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(appData);
+    } else {
+      connection.query(
+        "INSERT INTO ridereqpassenger (pickup, destination, from_lat, from_long,to_lat,to_long,driveruserid,passengeruserid,fare,vehicleID,idpassengerrides,status,time,createdAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())",
+        [
+          pickup,
+          destination,
+          from_lat,
+          from_long,
+          to_lat,
+          to_long,
+          driveruserid,
+          passengeruserid,
+          fare,
+          vehicleID,
+          idpassengerrides,
+          status,
+          time,
+        ],
+        function (err, rows, fields) {
+          if (!err) {
+            appData.error = 0;
+            console.log(rows.insertId);
+            appData["data"] = rows.insertId;
+            res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.get("/ridereqpassenger/:id", function (req, res) {
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT * FROM ridereqpassenger join driver on ridereqpassenger.driveruserid=driver.DriverUserID join vehicle on vehicle.DriverID=driver.DriverID join user on ridereqpassenger.driveruserid=user.userID where ridereqpassenger.passengeruserID=? and ridereqpassenger.status=0",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 rides.post("/addnew", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;
@@ -201,6 +404,38 @@ rides.post("/accept", function (req, res) {
     }
   });
 });
+rides.get("/getName/:id", function (req, res) {
+  var appData = {};
+  console.log("sdaaaaaaaaa");
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      console.log("sdaaaaaaaaa");
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT * FROM user where userID = ?",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 rides.get("/:id", function (req, res) {
   var appData = {};
   // var emailID = req.body.emailID;
@@ -385,7 +620,37 @@ rides.get("/checkifleft/:id", function (req, res) {
     }
   });
 });
-
+rides.get("/getuniqueallwithcolumns/:id", function (req, res) {
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT * FROM ridereqpassenger join user on ridereqpassenger.passengeruserid=user.userID WHERE  ridereqpassenger.driveruserid=? and ridereqpassenger.passengeruserid IN ( SELECT DISTINCT passengeruserid FROM fyp.ridereqpassenger)",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 rides.post("/addnegotiation", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;
@@ -457,7 +722,7 @@ rides.get("/riderequests/:driveruserid", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT driver.driverID, driver.DriverUserID, ridenegotiation.driverFare, ridenegotiation.userID, ridenegotiation.userFare, ride.RideID, ridenegotiation.location,user.userid, user.firstName, user.lastName, ridenegotiation.latitude,ridenegotiation.longitude, driver_location.latitude as dLatitude, driver_location.longitude as drLongitude, driver_location.location as DriverfLocation,driver_location_to.to_longitude,driver_location_to.to_latitude, driver_location_to.to_location FROM driver join ride ON driver.DriverID = ride.DriverID join ridenegotiation on ridenegotiation.rideID = ride.RideID join user on ridenegotiation.userid = user.userID join driver_location ON ride.DriverID=driver_location.driverID join driver_location_to ON ride.DriverID = driver_location_to.to_driverID where driver.DriverUserID = ?",
+        "SELECT driver.driverID, driver.DriverUserID, ridenegotiation.driverFare, ridenegotiation.userID, ridenegotiation.userFare, ride.RideID, ridenegotiation.location,user.userid, user.firstName, user.lastName, ridenegotiation.latitude,ridenegotiation.longitude, driver_location.latitude as dLatitude, driver_location.longitude as drLongitude, driver_location.location as DriverfLocation,driver_location_to.to_longitude,driver_location_to.to_latitude, driver_location_to.to_location FROM driver join ride ON driver.DriverID = ride.DriverID join ridenegotiation on ridenegotiation.rideID = ride.RideID join user on ridenegotiation.userid = user.userID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join rideinfo ON ride.RideID=rideinfo.RideID where driver.DriverUserID = ? and rideinfo.StatusID=1",
         [req.params.driveruserid],
         function (err, rows, fields) {
           if (!err) {
@@ -479,15 +744,16 @@ rides.get("/riderequests/:driveruserid", function (req, res) {
 
                       console.log("This is ending", rows);
                       appData["data"] = rows;
-                      res.status(200).json(appData);
                     } else {
+                      console.log("SDS");
                       appData["data"] = rows;
-                      res.status(200).json(appData);
                     }
                   }
                 }
               );
             }
+            res.status(200).json(appData);
+            // res.status(200).json(appData);
             // console.log(err);
           } else {
             appData["error"] = 1;
@@ -513,7 +779,7 @@ rides.get("/driveracceptedrides/:driveruserid/:rideid", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT rideinfo.StatusID,rideinfo.RideID,rideinfo.DriverID,rideinfo.PassengerID, ride.numberOfPeople, ride.fareEntered, rideinfo.fareDecided,user.phone as Phone,user.firstName as PassengerFName,user.lastName as PassengerLName,ridenegotiation.location as PassengerLocation,ridenegotiation.latitude as PassengerLat,ridenegotiation.longitude as PassengerLong,driver_location_to.to_location as DestLocation,driver_location_to.to_latitude as DestLat,driver_location_to.to_longitude as DestLong FROM rideinfo join ride on rideinfo.RideID =ride.RideID join ridenegotiation on rideinfo.PassengerID=ridenegotiation.userID join driver_location_to on rideinfo.DriverID=driver_location_to.to_driverUserId join user on rideinfo.PassengerID =user.userID where  rideinfo.RideID=? and rideinfo.DriverID=?",
+        "SELECT rideinfo.StatusID,rideinfo.RideID,rideinfo.DriverID,rideinfo.PassengerID, ride.numberOfPeople, ride.fareEntered, rideinfo.fareDecided,user.phone as Phone,user.firstName as PassengerFName,user.lastName as PassengerLName,ridenegotiation.location as PassengerLocation,ridenegotiation.latitude as PassengerLat,ridenegotiation.longitude as PassengerLong,driver_location_to.to_location as DestLocation,driver_location_to.to_latitude as DestLat,driver_location_to.to_longitude as DestLong FROM rideinfo join ride on rideinfo.RideID =ride.RideID join ridenegotiation on ride.RideID=ridenegotiation.RideID join driver_location_to on ride.RideID=driver_location_to.RideID join user on rideinfo.PassengerID =user.userID where  rideinfo.RideID=? and rideinfo.DriverID=?",
         [req.params.rideid, req.params.driveruserid],
 
         function (err, rows, fields) {
@@ -700,4 +966,37 @@ rides.get("/forably/:id", function (req, res) {
     }
   });
 });
+
+rides.get("/getridesformodal/:id", function (req, res) {
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT ride.RideID, driver.DriverUserID, user.firstName, user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID  where driver.DriverUserID = ? and ride.status=0",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+
 module.exports = rides;
