@@ -4,26 +4,7 @@ var database = require("../Database/database");
 var cors = require("cors");
 
 rides.use(cors());
-setInterval(() => {
-  const deleteQuery =
-    "DELETE FROM passengerrides WHERE createdAt < NOW() - INTERVAL 30 MINUTE";
-  // const deleteSecondQuery =
-  //   "DELETE FROM ridereqpassenger WHERE createdAt < NOW() - INTERVAL 3 MINUTE";
-  database.connection.getConnection(function (err, connection) {
-    if (err) {
-      console.log(err);
-    } else {
-      connection.query(deleteQuery, (error, results, fields) => {
-        if (error) throw error;
-        console.log(`Deleted passengerrides ${results} rows`);
-      });
-      // connection.query(deleteSecondQuery, (error, results, fields) => {
-      //   if (error) throw error;
-      //   console.log(`Deleted ridereqpassenger ${results} rows`);
-      // });
-    }
-  });
-}, 60000 * 5);
+
 rides.post("/passengercreateride", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;
