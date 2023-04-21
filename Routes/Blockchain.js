@@ -1,81 +1,83 @@
-// const express = require("express");
-// var blockchain = express.Router();
-// var database = require("../Database/database");
-// var cors = require("cors");
+const express = require("express");
+var blockchain = express.Router();
+var database = require("../Database/database");
+var cors = require("cors");
 
-// blockchain.use(cors());
+blockchain.use(cors());
+console.log("SSSSSSSSS");
+const multichain = require("multichain-node")({
+  port: 7208, // replace with the actual port of your blockchain
+  host: "35.78.125.132", // replace with the actual IP address or domain name of your blockchain
+  user: "multichainrpc", // replace with the actual username of your blockchain
+  pass: "q1s1e7AtZCrsmJL22rSK3dv9f6wHEfVokS1e6dXDTXx", // replace with the actual password of your blockchain
+});
 
-// const multichain = require("multichain-node")({
-//   port: 6720, // replace with the actual port of your blockchain
-//   host: "localhost", // replace with the actual IP address or domain name of your blockchain
-//   user: "multichainrpc", // replace with the actual username of your blockchain
-//   pass: "CAxkm8rbXSg9CEBTfbGWfr4EMtGRQduNSFw1GT1kCk4D", // replace with the actual password of your blockchain
-// });
-
-// // Connect to the blockchain when the server starts
-// multichain.getAddresses((err, res) => {
-//   console.log(res);
-// });
+// Connect to the blockchain when the server starts
+multichain.getAddresses((err, res) => {
+  console.log("RES", res);
+  // console.log("ERR", err);
+});
 
 // //     /register create a new address, take email and userid as params, add to database along with generated address
 // //      /sendreferral iske andar .issueFrom() phir .subscribe chalega. Dynamically add new asset withnaming convention ReferralCode<from-id>T<to-id>. Add referral code,fromemail,toemail in a new table database
 // //      /validatereferral with params of from and to ids and referral code. listAsset with Referralcode assetname. GetTx id and getrawtransactions to obtain from and to. Validate req.body.code with code stored in blockchain.
 // //
 
-// blockchain.get("/addaddress/:uid", function (req, res) {
-//   //   var today = new Date();
-//   //   var isEmailVerified = 1;
-//   var appData = {
-//     error: 1,
-//     data: "",
-//   };
-//   // const userID = 2;
-//   //   const emailID = req.body.email;
-//   //   const userID = req.body.userID;
-//   //   let newAddress;
+blockchain.get("/addaddress/:uid", function (req, res) {
+  var today = new Date();
+  var isEmailVerified = 1;
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  //   const userID = 2;
+  //  const emailID = req.body.email;
+  const userID = req.params.userID;
+  // let newAddress;
 
-//   database.connection.getConnection(function (err, connection) {
-//     // console.log(userData);
-//     if (err) {
-//       //   console.log("API HIT");
-//       appData["error"] = 1;
-//       appData["data"] = "Internal Server Error";
-//       res.status(500).json(appData);
-//       console.log(err);
-//     } else {
-//       //   console.log("API HIT");
-//       multichain.getNewAddress((err, address) => {
-//         if (err) {
-//           console.log(err);
-//         } else {
-//           console.log("newaddress", address);
-//           let newAddress = address;
-//           console.log("EMAILID", req.params.email);
-//           console.log("USERID", req.params.uid);
-//           connection.query(
-//             "UPDATE user SET address=? WHERE userID=? and isEmailVerified=1",
-//             [newAddress, req.params.uid],
-//             function (err, rows, fields) {
-//               if (!err) {
-//                 appData.error = 0;
-//                 console.log(rows);
-//                 appData["data"] = "Address registered successfully!";
-//                 res.status(201).json(appData);
-//               } else {
-//                 appData["data"] = "Error Occured!";
-//                 res.status(400).json(appData);
-//                 console.log(err);
-//               }
-//             }
-//           );
-//           console.log(newAddress);
-//         }
-//       });
+  database.connection.getConnection(function (err, connection) {
+    //     // console.log(userData);
+    if (err) {
+      //       //   console.log("API HIT");
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(err);
+    } else {
+      console.log("API HIT");
+      multichain.getNewAddress((err, address) => {
+        if (err) {
+          console.log(err);
+        } else {
+          //  console.log("newaddress", address);
+          //  let newAddress = address;
+          console.log("EMAILID", req.params.email);
+          console.log("USERID", req.params.uid);
+          connection.query(
+            "UPDATE user SET address=? WHERE userID=?",
+            [address, req.params.uid],
+            function (err, rows, fields) {
+              if (!err) {
+                appData.error = 0;
+                console.log(rows);
+                appData["data"] = "Address registered successfully!";
+                res.status(201).json(appData);
+              } else {
+                appData.error = 1;
+                appData["data"] = "Verify your email first!";
+                res.status(400).json(appData);
+                console.log(err);
+              }
+            }
+          );
+          // console.log(newAddress);
+        }
+      });
 
-//       connection.release();
-//     }
-//   });
-// });
+      connection.release();
+    }
+  });
+});
 
 // multichain.issueFrom(
 //   {
@@ -170,4 +172,4 @@
 //     });
 //   }
 // });
-// module.exports = blockchain;
+module.exports = blockchain;

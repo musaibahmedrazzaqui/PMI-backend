@@ -611,7 +611,7 @@ rides.get("/getuniqueallwithcolumns/:id", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT * FROM ridereqpassenger join user on ridereqpassenger.passengeruserid=user.userID WHERE  ridereqpassenger.driveruserid=? and ridereqpassenger.passengeruserid IN ( SELECT DISTINCT passengeruserid FROM fyp.ridereqpassenger)",
+        "SELECT * FROM ridereqpassenger join user on ridereqpassenger.passengeruserid=user.userID WHERE  ridereqpassenger.driveruserid=? and ridereqpassenger.passengeruserid IN ( SELECT DISTINCT passengeruserid FROM ridereqpassenger)",
         [req.params.id],
         function (err, rows, fields) {
           if (!err) {

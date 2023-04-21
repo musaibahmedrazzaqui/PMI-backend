@@ -87,6 +87,7 @@ driver.get("/:id", function (req, res) {
       );
       connection.release();
     }
+    console.log(appData);
   });
 });
 
@@ -301,4 +302,5 @@ driver.post("/addtoride", function (req, res) {
     }
   });
 });
+
 module.exports = driver;

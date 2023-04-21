@@ -83,7 +83,8 @@ users.post("/register", function (req, res) {
                 function (err, rows, fields) {
                   if (!err) {
                     appData.error = 0;
-                    appData["data"] = "User registered successfully!";
+                    appData["data"] = rows;
+                    console.log("rows", rows);
                     res.status(201).json(appData);
                   } else {
                     appData["data"] = "Error Occured!";

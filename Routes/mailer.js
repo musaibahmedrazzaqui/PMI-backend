@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
-const id = 14;
+const axios = require("axios");
 var mailer = express.Router();
 var database = require("../Database/database");
 var cors = require("cors");
@@ -10,7 +10,76 @@ const { query } = require("express");
 mailer.use(cors());
 mailer.use(bodyParser.json());
 // mailer.use(bodyParser.json());
+mailer.post("/send-email-referral", (req, res) => {
+  const FromUserID = req.body.FromUserID;
+  const ToUserEmail = req.body.ToUserEmail;
+  const referralCode = req.body.referralCode;
+  let userName;
+  let lastName;
+  let emailID;
+  console.log("HI");
+  console.log(FromUserID);
+  // console.log(req.body);
+  try {
+    let url = `https://pmi-backend-production.up.railway.app/rides/getName/${FromUserID}`;
+    console.log(url);
+    axios.get(url).then((res) => {
+      userName = res.data.data[0].firstName;
+      lastName = res.data.data[0].lastName;
+      emailID = res.data.data[0].emailID;
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: "pmifyp@gmail.com",
+          pass: "zhdlzpsjqbdajagc",
+        },
+      });
 
+      const mailOptions = {
+        from: "your_gmail_username",
+        to: ToUserEmail,
+        subject: "Recieved a Referral Code! - Pool Me In Platform",
+        html: `
+    <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #333; margin-bottom: 20px;">
+      Dear user,
+    </p>
+
+    <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #333; margin-bottom: 20px;">
+      You have received a referral code from <strong>${userName.toUpperCase()} ${lastName.toUpperCase()}</strong> bearing email <strong>${emailID}</strong>.
+    </p>
+
+    <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #333; margin-bottom: 20px;">
+      Please enter <strong>${referralCode}</strong> after you register on our app to start using the Pool Me In Platform.
+    </p>
+
+    <p style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #333; margin-bottom: 20px;">
+      Note: We require referrals to allow users to use our app!
+    </p>
+  `,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+          res
+            .status(500)
+            .send({ message: "Error occurred while sending email." });
+        } else {
+          console.log("Email sent: " + info.response);
+          res.status(200).send({ message: "Email sent successfully!" });
+        }
+      });
+    });
+    // res.json(response.data);
+    // console.log("RES", response);
+    // userName = res.firstName;
+    // lastName = res.lastName;
+    // emailID = res.emailID;
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error fetching data from API");
+  }
+});
 mailer.post("/send-email", (req, res) => {
   const email = req.body.email;
   console.log("HI");
@@ -22,15 +91,24 @@ mailer.post("/send-email", (req, res) => {
       pass: "zhdlzpsjqbdajagc",
     },
   });
-  console.log(id);
+  // console.log(id);
   const mailOptions = {
     from: "your_gmail_username",
     to: email,
-    subject: "Email verification",
-    html:
-      '<p>Click<a href="https://pmi-backend-production.up.railway.app/rides/verify-email/' +
-      email +
-      '">here</a> to verify your email on the POOL ME IN PLATFORM.</p>',
+    subject: "Email verification -POOL ME IN!",
+    html: `
+    <div style="background-color: #f2f2f2; padding: 20px;">
+      <h1 style="color: #0077b6; font-size: 28px; margin-bottom: 30px;">Verify your email address</h1>
+      <p style="font-size: 16px; line-height: 1.5; color: #4d4d4d;">Dear user,</p>
+      <p style="font-size: 16px; line-height: 1.5; color: #4d4d4d;">Thank you for signing up with POOL ME IN!</p>
+      <p style="font-size: 16px; line-height: 1.5; color: #4d4d4d;">To complete your registration, please verify your email address by clicking the link below:</p>
+      <div style="background-color: #0077b6; padding: 10px 20px; display: inline-block; margin: 20px 0;">
+        <a href="https://pmi-backend-production.up.railway.app/rides/verify-email/${email}" style="color: #fff; text-decoration: none; font-size: 16px;">Verify Email</a>
+      </div>
+      <p style="font-size: 16px; line-height: 1.5; color: #4d4d4d;">Thank you,</p>
+      <p style="font-size: 16px; line-height: 1.5; color: #4d4d4d;">The POOL ME IN Team</p>
+    </div>
+  `,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
