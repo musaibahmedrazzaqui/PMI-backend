@@ -634,6 +634,38 @@ rides.get("/getuniqueallwithcolumns/:id", function (req, res) {
     }
   });
 });
+rides.get("/deleteridereq/:id", function (req, res) {
+  var appData = {};
+  console.log("iddDd", req.params.id);
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "Delete from ridereqpassenger where idridereqpassenger=?",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 rides.post("/addnegotiation", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;

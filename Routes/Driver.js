@@ -95,6 +95,7 @@ driver.post("/createnewridefpass", function (req, res) {
   console.log("PASSRIDEDATA", req.body.passridedata);
   const passridedata = req.body.passridedata;
   const did = req.body.did;
+  const idx = req.body.idridereq;
   var appData = {
     error: 1,
     data: "",
@@ -320,7 +321,24 @@ driver.post("/addtoride", function (req, res) {
           }
         }
       );
-
+      connection.query(
+        "DELETE FROM ridereqpassenger idridereqpassenger=?",
+        [idx],
+        function (err, rows, fields) {
+          if (!err) {
+            console.log("in first");
+            appData.error = 0;
+            appData["data"] = "Row updated!";
+            // res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            console.log("in second");
+            appData["data"] = "Error Occured!";
+            // res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
       connection.release();
     }
   });
