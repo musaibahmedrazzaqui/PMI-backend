@@ -48,5 +48,45 @@ referral.post("/sendcode", function (req, res) {
     }
   });
 });
-
+referral.post("/validatecode", function (req, res) {
+  //   var today = new Date();
+  //   var isEmailVerified = 1;
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  // const userID = 2;
+  const ToUserEmail = req.body.email;
+  const referralCode = req.body.referralCode;
+  var userData = {
+    ToUserEmail: req.body.email,
+    referralCode: req.body.referralCode,
+  };
+  database.connection.getConnection(function (err, connection) {
+    console.log(userData);
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(err);
+    } else {
+      connection.query(
+        "Select * from referrals where ToUserEmail=? and referralCode=?",
+        [ToUserEmail, referralCode],
+        function (err, rows, fields) {
+          if (!err) {
+            appData.error = 0;
+            appData["data"] = rows;
+            res.status(201).json(appData);
+          } else {
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 module.exports = referral;

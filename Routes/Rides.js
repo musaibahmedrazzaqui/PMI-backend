@@ -62,6 +62,7 @@ rides.post("/passengercreateride", function (req, res) {
 });
 rides.get("/getpassengerrides/:id", function (req, res) {
   var appData = {};
+  console.log("im hurt daddy");
   // var emailID = req.body.emailID;
   database.connection.getConnection(function (err, connection) {
     if (err) {
@@ -70,12 +71,13 @@ rides.get("/getpassengerrides/:id", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT * FROM passengerrides join user on passengerrides.userID=user.userID where passengerrides.userID!=?",
+        "SELECT * FROM passengerrides join user on passengerrides.userID=user.userID  where passengerrides.userID!=?",
         [req.params.id],
         function (err, rows, fields) {
           if (!err) {
             appData["error"] = 0;
             appData["data"] = rows;
+            console.log(rows);
             res.status(200).json(appData);
             console.log(rows);
           } else {
@@ -167,7 +169,7 @@ rides.get("/ridereqpassenger/:id", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT * FROM ridereqpassenger join driver on ridereqpassenger.driveruserid=driver.DriverUserID join vehicle on vehicle.DriverID=driver.DriverID join user on ridereqpassenger.driveruserid=user.userID where ridereqpassenger.passengeruserID=? and ridereqpassenger.status=0",
+        "SELECT * FROM ridereqpassenger join driver on ridereqpassenger.driveruserid=driver.DriverUserID join vehicle on vehicle.vehicleID=ridereqpassenger.vehicleID join user on ridereqpassenger.driveruserid=user.userID where ridereqpassenger.passengeruserID=? and ridereqpassenger.status=0",
         [req.params.id],
         function (err, rows, fields) {
           if (!err) {

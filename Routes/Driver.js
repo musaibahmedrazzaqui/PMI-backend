@@ -235,6 +235,7 @@ driver.post("/addtoride", function (req, res) {
   const passridedata = req.body.passridedata;
   const did = req.body.did;
   const rideid = req.body.rid;
+  const idx = req.body.idridereq;
   var appData = {
     error: 1,
     data: "",
@@ -243,11 +244,31 @@ driver.post("/addtoride", function (req, res) {
   database.connection.getConnection(function (err, connection) {
     // console.log(userData);
     if (err) {
+      console.log("in error");
       appData["error"] = 1;
       appData["data"] = "Internal Server Error";
       res.status(500).json(appData);
-      console.log(err);
+      console.log(appData);
     } else {
+      console.log("HERE");
+      connection.query(
+        "UPDATE ridereqpassenger SET status=2 WHERE idridereqpassenger=?",
+        [idx],
+        function (err, rows, fields) {
+          if (!err) {
+            console.log("in first");
+            appData.error = 0;
+            appData["data"] = "Row updated!";
+            // res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            console.log("in second");
+            appData["data"] = "Error Occured!";
+            // res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
       connection.query(
         "INSERT INTO ridenegotiation (driverFare, userFare, finalFare, rideID, latitude, longitude, userID,location ) VALUES (?,?,?,?,?,?,?,?)",
         [
@@ -262,35 +283,37 @@ driver.post("/addtoride", function (req, res) {
         ],
         function (err, rows, fields) {
           if (!err) {
+            console.log("in first");
             appData.error = 0;
-            appData["data"] = "Ride posted!!";
+            appData["data"] = "Row updated!";
             // res.status(201).json(appData);
-            // res.status(201).json(appData);
-            console.log("First", rows.insertId);
-            connection.query(
-              "INSERT INTO rideinfo (RideID, PassengerID, DriverID, StatusID, fareDecided) VALUES (?,?,?,1,?)",
-              [
-                rideid,
-                passridedata[0].passengeruserid,
-                passridedata[0].driveruserid,
-
-                passridedata[0].fare,
-              ],
-              function (err, rows, fields) {
-                if (!err) {
-                  appData.error = 0;
-                  appData["data"] = "Ride started!!";
-                  res.status(201).json(appData);
-                  // console.log(appData);
-                  console.log("SEcond", rows.insertId);
-                } else {
-                  appData["data"] = "Error Occured!";
-                  res.status(400).json(appData);
-                  console.log(err);
-                }
-              }
-            );
+            console.log(appData);
           } else {
+            console.log("in second");
+            appData["data"] = "Error Occured!";
+            // res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.query(
+        "INSERT INTO rideinfo (RideID, PassengerID, DriverID, StatusID, fareDecided) VALUES (?,?,?,1,?)",
+        [
+          rideid,
+          passridedata[0].passengeruserid,
+          passridedata[0].driveruserid,
+
+          passridedata[0].fare,
+        ],
+        function (err, rows, fields) {
+          if (!err) {
+            console.log("in first");
+            appData.error = 0;
+            appData["data"] = "Row updated!";
+            res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            console.log("in second");
             appData["data"] = "Error Occured!";
             res.status(400).json(appData);
             console.log(err);

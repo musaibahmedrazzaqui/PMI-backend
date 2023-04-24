@@ -31,7 +31,7 @@ users.post("/register", function (req, res) {
   // const userID = 2;
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
-  const insitituteID = 1;
+  const insitituteID = req.body.insitituteID;
   const levelID = 1;
   const gender = req.body.gender;
   const emailID = req.body.emailID;
