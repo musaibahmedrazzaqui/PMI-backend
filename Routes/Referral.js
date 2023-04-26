@@ -48,7 +48,7 @@ referral.post("/sendcode", function (req, res) {
     }
   });
 });
-referral.post("/validatecode", function (req, res) {
+referral.post("/validatecode/", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;
   var appData = {
@@ -56,7 +56,7 @@ referral.post("/validatecode", function (req, res) {
     data: "",
   };
   // const userID = 2;
-  const ToUserEmail = req.body.email;
+  const ToUserEmail = req.body.ToUserEmail;
   const referralCode = req.body.referralCode;
   var userData = {
     ToUserEmail: req.body.email,
@@ -72,12 +72,26 @@ referral.post("/validatecode", function (req, res) {
     } else {
       connection.query(
         "Select * from referrals where ToUserEmail=? and referralCode=?",
-        [ToUserEmail, referralCode],
+        [ToUserEmail,referralCode],
         function (err, rows, fields) {
           if (!err) {
-            appData.error = 0;
-            appData["data"] = rows;
-            res.status(201).json(appData);
+            
+            console.log(rows)
+            if(rows.length>0){
+              appData.error = 0;
+                  // console.log(ro.referralCode)
+                  appData["data"] = rows;
+                  res.status(201).json(appData);
+            }
+            else{
+              appData.error=-1;
+              appData["data"]="No Records found";
+              
+              res.status(201).json(appData);
+              // console.log()
+            }
+            // console.log("HII")
+            
           } else {
             appData["data"] = "Error Occured!";
             res.status(400).json(appData);

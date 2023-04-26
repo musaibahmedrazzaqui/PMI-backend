@@ -15,7 +15,21 @@ const multichain = require("multichain-node")({
 // Connect to the blockchain when the server starts
 multichain.getAddresses((err, res) => {
   console.log("RES", res);
+  for (let i = 0; i < res.length; i++) {
+    multichain.grant({
+      addresses: res[i],
+      permissions: "send,receive,issue,admin",
+    });
+  }
+
   // console.log("ERR", err);
+});
+multichain.listAssets((err, result) => {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log(result);
+  }
 });
 
 // //     /register create a new address, take email and userid as params, add to database along with generated address
@@ -79,41 +93,105 @@ blockchain.get("/addaddress/:uid", function (req, res) {
   });
 });
 
-// multichain.issueFrom(
-//   {
-//     // address: "12ebWCiVmCcKRLBDrpPkhXdimL2fhbtxhvPYcw", // replace with the address you want to issue the asset to
-//     asset: "Referdekhlebhai",
-//     from: "1NKXhhk9TqVRdrDWnAJcFqVDfiJJSmiBgi73v6",
-//     to: "12ebWCiVmCcKRLBDrpPkhXdimL2fhbtxhvPYcw",
-//     qty: 1,
-//     details: { code: "def321" },
-//   },
-//   (err, res) => {
-//     if ((err.code = -705)) {
-//       console.error("Already created");
-//       // res.status(500).send(err);
-//     } else {
-//       console.log("RESPONSE", res);
-//       console.log("Referral code created successfully");
-//     }
-//   }
-// );
-// // multichain.listAssets({ verbose: true }, (err, res) => {
-// //   if (err) {
-// //     console.log("Error:", err);
-// //   } else {
-// //     console.log("List of assets:", res);
-// //   }
-// // });
+// blockchain.get("/addaddress/:uid", function (req, res) {
+blockchain.post("/pushcode", function (req, res) {
+  const FromUserID = req.body.FromUserID;
+  const ToUserEmail = req.body.ToUserEmail;
+  console.log("from", req.body.referralCode);
+  const referralCode = req.body.referralCode;
+
+  const codetosend = referralCode.toString();
+  let FromAddress;
+  let ToAddress;
+  let FromUserEmail;
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  database.connection.getConnection(function (err, connection) {
+    //     // console.log(userData);
+    if (err) {
+      //       //   console.log("API HIT");
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(err);
+    } else {
+      console.log("API HIT");
+      connection.query(
+        "Select emailID,address from user where userID=?",
+        [FromUserID],
+        function (err, rows, fields) {
+          if (!err) {
+            appData.error = 0;
+            FromAddress = rows[0].address;
+            console.log(FromAddress);
+
+            FromUserEmail = rows[0].emailID;
+            console.log(rows);
+            appData["data"] = rows;
+            connection.query(
+              "Select address from user where emailID=?",
+              [ToUserEmail],
+              function (err, rows, fields) {
+                if (!err) {
+                  appData.error = 0;
+                  ToAddress = rows[0].address;
+                  console.log(ToAddress);
+                  console.log(FromUserEmail);
+                  // console.log(rows);
+
+                  appData["data"] = rows;
+                  multichain.issueFrom(
+                    {
+                      // address: "12ebWCiVmCcKRLBDrpPkhXdimL2fhbtxhvPYcw", // replace with the address you want to issue the asset to
+                      asset: `${FromUserID}to${ToUserEmail}`,
+                      from: FromAddress,
+                      to: ToAddress,
+                      qty: 1,
+                      details: { code: codetosend },
+                    },
+                    (err, res) => {
+                      if (err) {
+                        console.log(err);
+                        // console.log(FromAddress, To\
+                      } else {
+                        console.log("RESPONSE", res);
+                        console.log("Referral code created successfully");
+                        multichain.listAssets((err, res) => {
+                          if (err) {
+                            console.log("Error:", err);
+                          } else {
+                            console.log("List of assets:", res);
+                          }
+                        });
+                      }
+                    }
+                  );
+                  appData.error = 0;
+                  appData["data"] = "Successful";
+                  res.status(201).json(appData);
+                  // res.status(201).json(appData);
+                } else {
+                  console.log(err);
+                }
+              }
+            );
+            // res.status(201).json(appData);
+          } else {
+            console.log(err);
+          }
+        }
+      );
+
+      connection.release();
+    }
+  });
+});
+
 // const assetName = "Referdekhlebhai";
 // const code = "def321";
-// multichain.subscribe({ stream: assetName }, (err, res) => {
-//   if (err) {
-//     console.log("Error subscribing to asset:", err);
-//   } else {
-//     console.log("Subscribed to asset:", res);
-//   }
-// });
+
 // multichain.listAssets((err, res) => {
 //   const substr = "bhai";
 //   if (err) {
@@ -148,28 +226,28 @@ blockchain.get("/addaddress/:uid", function (req, res) {
 // //   }
 // // );
 
-// const txid = "3356dfe1934247c06eeda05b0afa979d076e6b1049021dd0a25014d3c70dc11a";
-// const vout = 0;
-// multichain.getRawTransaction({ txid: txid, vout: vout }, (err, data) => {
-//   if (err) {
-//     console.error("ERRRRRRRR", err);
-//   } else {
-//     console.log(data);
-//     multichain.decodeRawTransaction({ hexstring: data }, (err, decoded) => {
-//       if (err) {
-//         console.log("ERRindecode", err);
-//       } else {
-//         console.log("code", decoded.issue.details.code);
-//         console.log(
-//           "DECODED to address",
-//           decoded.vout[0].scriptPubKey.addresses[0]
-//         );
-//         console.log(
-//           "DECODED from address",
-//           decoded.vout[2].scriptPubKey.addresses[0]
-//         );
-//       }
-//     });
-//   }
-// });
+const txid = "19d868dc2f0f113d51478a67908f16e8c620f0c6529463a2d352b8322e08a8ae";
+const vout = 0;
+multichain.getRawTransaction({ txid: txid, vout: vout }, (err, data) => {
+  if (err) {
+    console.error("ERRRRRRRR", err);
+  } else {
+    console.log(data);
+    multichain.decodeRawTransaction({ hexstring: data }, (err, decoded) => {
+      if (err) {
+        console.log("ERRindecode", err);
+      } else {
+        console.log("code", decoded.issue.details.code);
+        console.log(
+          "DECODED to address",
+          decoded.vout[0].scriptPubKey.addresses[0]
+        );
+        console.log(
+          "DECODED from address",
+          decoded.vout[2].scriptPubKey.addresses[0]
+        );
+      }
+    });
+  }
+});
 module.exports = blockchain;

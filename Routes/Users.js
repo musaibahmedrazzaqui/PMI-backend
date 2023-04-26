@@ -114,7 +114,7 @@ users.post("/login", function (req, res) {
       console.log(err);
     } else {
       connection.query(
-        "SELECT userID, emailID, password, isEmailVerified FROM user WHERE emailID = ?",
+        "SELECT userID, emailID, password, isEmailVerified, isReferralEntered FROM user WHERE emailID = ?",
         [emailID],
         function (err, rows, fields) {
           if (err) {
@@ -125,28 +125,35 @@ users.post("/login", function (req, res) {
             console.log(err);
           } else {
             if (rows.length > 0) {
-              if (rows[0].isEmailVerified == 1) {
-                if (rows[0].password == password) {
-                  let token = jwt.sign(rows[0], SECRET_KEY, {
-                    expiresIn: 1440,
-                  });
-                  appData.error = 0;
-                  appData["data"] = rows;
-                  res.header("Access-Control-Allow-Origin");
-                  res.status(200).json(appData);
-                  console.log(rows);
+              if (rows[0].password == password) {
+                // let token = jwt.sign(rows[0], SECRET_KEY, {
+                //   expiresIn: 1440,
+                // });
+                if (rows[0].isEmailVerified == 1) {
+                  if (rows[0].isReferralEntered == 1) {
+                    appData.error = 0;
+                    appData["data"] = rows;
+                    res.header("Access-Control-Allow-Origin");
+                    res.status(200).json(appData);
+                    console.log(rows);
+                  } else {
+                    appData.error = 5;
+                    appData["data"] = rows;
+                    res.status(200).json(appData);
+                    console.log(appData.data);
+                  }
                 } else {
-                  appData.error = 1;
-                  appData["token"] = token;
-
+                  appData.error = 3;
+                  appData["data"] = "Not verified email";
                   res.status(200).json(appData);
-                  console.log("rows in else block", rows);
+                  console.log(appData.data);
                 }
               } else {
-                appData.error = 3;
-                appData["data"] = "Not verified email";
-                res.status(500).json(appData);
-                console.log(appData.data);
+                appData.error = 4;
+                appData["data"] = "Password do not match";
+
+                res.status(200).json(appData);
+                console.log("rows in else block", rows);
               }
             } else {
               appData.error = 2;
@@ -163,26 +170,6 @@ users.post("/login", function (req, res) {
   });
 });
 
-users.use(function (req, res, next) {
-  var token = req.body.token || req.headers["token"];
-  var appData = {};
-  if (token) {
-    jwt.verify(token, process.env.SECRET_KEY, function (err) {
-      if (err) {
-        appData["error"] = 1;
-        appData["data"] = "Token is invalid";
-        res.status(500).json(appData);
-        console.log("in jwt verify");
-      } else {
-        next();
-      }
-    });
-  } else {
-    appData["error"] = 1;
-    appData["data"] = "Please send a token";
-    res.status(403).json(appData);
-  }
-});
 users.get("/verify-email/:email", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;

@@ -451,6 +451,50 @@ rides.get("/:id", function (req, res) {
     }
   });
 });
+rides.get("/referral-entered/:email", function (req, res) {
+  //   var today = new Date();
+  //   var isEmailVerified = 1;
+  console.log("ooper");
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  console.log("neeche");
+  // const userID = 2;
+  // const email = req.body.email;
+
+  database.connection.getConnection(function (err, connection) {
+    // console.log(userData);
+    if (err) {
+      console.log("in error");
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(appData);
+    } else {
+      console.log("HERE");
+      connection.query(
+        "UPDATE user SET isReferralEntered=1 WHERE emailID=?",
+        [req.params.email],
+        function (err, rows, fields) {
+          if (!err) {
+            console.log("in first");
+            appData.error = 0;
+            appData["data"] = "Row updated!";
+            res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            console.log("in second");
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 rides.get("/verify-email/:email", function (req, res) {
   //   var today = new Date();
   //   var isEmailVerified = 1;
