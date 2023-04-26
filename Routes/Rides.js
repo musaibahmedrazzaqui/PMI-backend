@@ -786,31 +786,33 @@ rides.get("/riderequests/:driveruserid", function (req, res) {
         function (err, rows, fields) {
           if (!err) {
             appData["error"] = 0;
-
+            appData["data"] = rows;
             // console.log(rows[0].RideID);
             // console.log(rows[0].userID);
-            for (let i = 0; i < rows.length; i++) {
-              // console.log(rows[0].RideID);
-              connection.query(
-                "Select * from rideinfo where RideID = ? and StatusID =1 and PassengerID =?",
-                [rows[i].RideID, rows[i].userID],
-                function (err, rowstwo, fields) {
-                  if (!err) {
-                    if (rowstwo.length > 0) {
-                      console.log(rows);
-                      rows.splice(i, 1);
-                      console.log("After splice", rows);
+            // for (let i = 0; i < rows.length; i++) {
+            //   // console.log(rows[0].RideID);
+            //   connection.query(
+            //     "Select * from rideinfo where RideID = ? and StatusID =1 and PassengerID =?",
+            //     [rows[i].RideID, rows[i].userID],
+            //     function (err, rowstwo, fields) {
+            //       if (!err) {
+            //         if (rowstwo.length > 0) {
+            //           console.log(rows);
+            //           rows.splice(i, 1);
+            //           console.log("After splice", rows);
 
-                      console.log("This is ending", rows);
-                      appData["data"] = rows;
-                    } else {
-                      console.log("SDS");
-                      appData["data"] = rows;
-                    }
-                  }
-                }
-              );
-            }
+            //           console.log("This is ending", rows);
+            //           appData["data"] = rows;
+            //         } else {
+            //           console.log("SDS");
+            //           console.log(rows);
+            //           appData["data"] = rows;
+            //         }
+            //       }
+            //     }
+            //   );
+            // }
+            console.log("APPDATAAAAAAAAAAAAAAAA", appData);
             res.status(200).json(appData);
             // res.status(200).json(appData);
             // console.log(err);
