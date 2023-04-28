@@ -1001,7 +1001,7 @@ rides.get("/forably/:id", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT rideinfo.RideID, rideinfo.PassengerID,rideinfo.DriverID,rideinfo.fareDecided, user.firstName, user.lastName,user.phone,driver_location_to.to_latitude as DestLat,driver_location_to.to_longitude as DestLong,driver_location_to.to_location as DestLocation FROM rideinfo join user on user.userID=rideinfo.DriverID join driver_location_to on rideinfo.DriverID=driver_location_to.to_driverUserId where rideinfo.StatusID=1 and rideinfo.PassengerID=?",
+        "SELECT rideinfo.RideID, rideinfo.PassengerID,rideinfo.DriverID,rideinfo.fareDecided,user.firstName, user.lastName,user.phone,driver_location_to.to_latitude as DestLat,driver_location_to.to_longitude as DestLong,driver_location_to.to_location as DestLocation FROM rideinfo join user on user.userID=rideinfo.DriverID join ride on rideinfo.RideID=ride.RideID join driver_location_to on rideinfo.RideID=driver_location_to.rideID where rideinfo.StatusID=1 and rideinfo.PassengerID=? and ride.status!=1;",
         [req.params.id],
         function (err, rows, fields) {
           if (rows.length > 0) {
