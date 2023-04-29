@@ -29,10 +29,10 @@ users.post("/register", function (req, res) {
     numOfReferrals: 0,
   };
   // const userID = 2;
-  console.log(insitituteID);
+  // console.log(insitituteID);
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
-  const insitituteID = req.body.insitituteID;
+  const insitituteID = req.body.instituteID;
   const levelID = 1;
   const gender = req.body.gender;
   const emailID = req.body.emailID;
