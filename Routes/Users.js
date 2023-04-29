@@ -18,7 +18,7 @@ users.post("/register", function (req, res) {
   var userData = {
     firstName: req.body.firstName,
     lastName: req.body.lastName,
-    insitituteID: 1,
+    insitituteID: req.body.insitituteID,
     levelID: 1,
     gender: req.body.gender,
     emailID: req.body.emailID,
@@ -29,6 +29,7 @@ users.post("/register", function (req, res) {
     numOfReferrals: 0,
   };
   // const userID = 2;
+  console.log(insitituteID);
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
   const insitituteID = req.body.insitituteID;
