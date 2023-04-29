@@ -32,7 +32,7 @@ users.post("/register", function (req, res) {
   // console.log(insitituteID);
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
-  const insitituteID = req.body.instituteID;
+  const instituteID = req.body.instituteID;
   const levelID = 1;
   const gender = req.body.gender;
   const emailID = req.body.emailID;
@@ -70,7 +70,7 @@ users.post("/register", function (req, res) {
                 [
                   firstName,
                   lastName,
-                  insitituteID,
+                  instituteID,
                   levelID,
                   gender,
                   emailID,
