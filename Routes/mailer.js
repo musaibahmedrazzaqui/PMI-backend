@@ -16,6 +16,7 @@ const transporter = nodemailer.createTransport({
     user: "pmifyp@gmail.com",
     pass: "zhdlzpsjqbdajagc",
   },
+  from: "pmyifyp@gmail.com",
 });
 setInterval(() => {
   const query = `SELECT * FROM passengerrides join user on user.userID=passengerrides.userID WHERE TIMESTAMPDIFF(MINUTE, createdAt, NOW()) > 5 and passengerrides.idpassengerrides NOT IN (Select idpassengerrides from ridereqpassenger)`;
@@ -72,10 +73,11 @@ mailer.post("/send-email-referral", (req, res) => {
           user: "pmifyp@gmail.com",
           pass: "zhdlzpsjqbdajagc",
         },
+        from: "pmifyp@gmail.com",
       });
 
       const mailOptions = {
-        from: "your_gmail_username",
+        from: "POOL ME IN PLATFORM <pmifyp@gmail.com>",
         to: ToUserEmail,
         subject: "Recieved a Referral Code! - Pool Me In Platform",
         html: `

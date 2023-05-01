@@ -587,7 +587,7 @@ rides.get("/getrides/:id", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT ride.RideID, driver.DriverUserID, user.firstName, user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.latitude as DriverLat,driver_location.longitude as DriverLong,driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID  where driver.DriverUserID != ? and ride.status=0",
+        "SELECT ride.RideID, ride.datetime, driver.DriverUserID, user.firstName, user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.latitude as DriverLat,driver_location.longitude as DriverLong,driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID  where driver.DriverUserID != ? and ride.status=0",
         [req.params.id],
         function (err, rows, fields) {
           if (!err) {
