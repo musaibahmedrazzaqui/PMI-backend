@@ -30,7 +30,7 @@ setInterval(() => {
           console.log(`Deleted ${result.affectedRows} rows`);
           results.forEach((entry) => {
             const mailOptions = {
-              from: "your_email",
+              from: "Pool Me In Platform <pmifyp@gmail.com>",
               to: entry.emailID,
               subject: "POOL ME IN-Your request has been deleted",
               html: `<p style="font-size: 16px;">Hello, ${entry.firstName},</p>
@@ -131,10 +131,11 @@ mailer.post("/send-email", (req, res) => {
       user: "pmifyp@gmail.com",
       pass: "zhdlzpsjqbdajagc",
     },
+    from: "pmifyp@gmail.com",
   });
   // console.log(id);
   const mailOptions = {
-    from: "your_gmail_username",
+    from: "Pool Me In Platform <pmifyp@gmail.com>",
     to: email,
     subject: "Email verification -POOL ME IN!",
     html: `
