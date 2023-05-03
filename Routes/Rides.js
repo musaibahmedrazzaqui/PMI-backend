@@ -375,8 +375,20 @@ rides.post("/accept", function (req, res) {
           if (!err) {
             appData.error = 0;
             appData["data"] = "Ride started!!";
-            res.status(201).json(appData);
-            console.log(appData);
+            connection.query(
+              "Update ride set numberOfPeople=numberOfPeople - 1 where RideID =?",
+              [RideID],
+              function (err, rows, fields) {
+                if (!err) {
+                  res.status(201).json(appData);
+                  console.log(appData);
+                } else {
+                  appData["error"] = 1;
+                  appData["data"] = "Unsucessful";
+                  res.status(201).json(appData);
+                }
+              }
+            );
           } else {
             appData["data"] = "Error Occured!";
             res.status(400).json(appData);
@@ -580,6 +592,7 @@ rides.get("/checkforrequest/:id/:rideid", function (req, res) {
 rides.get("/getrides/:id", function (req, res) {
   var appData = {};
   // var emailID = req.body.emailID;
+  console.log("ID", req.params.id);
   database.connection.getConnection(function (err, connection) {
     if (err) {
       appData["error"] = 1;
@@ -587,7 +600,7 @@ rides.get("/getrides/:id", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT ride.RideID, ride.datetime, driver.DriverUserID, user.firstName, user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.latitude as DriverLat,driver_location.longitude as DriverLong,driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID  where driver.DriverUserID != ? and ride.status=0",
+        "SELECT ride.RideID, ride.datetime, driver.DriverUserID, user.gender,user.firstName, user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.latitude as DriverLat,driver_location.longitude as DriverLong,driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID  where driver.DriverUserID != ? and ride.status=0 AND ride.numberOfPeople>1 AND ride.datetime > CONVERT_TZ(NOW(), 'UTC', 'Asia/Karachi')",
         [req.params.id],
         function (err, rows, fields) {
           if (!err) {
@@ -626,7 +639,7 @@ rides.get("/checkifleft/:id", function (req, res) {
           if (!err) {
             if (rows.length > 0) {
               appData["error"] = 0;
-              appData["data"] = "Rider has left";
+              appData["data"] = "Driver has left";
               res.status(200).json(appData);
               console.log(appData);
             } else {
@@ -648,8 +661,51 @@ rides.get("/checkifleft/:id", function (req, res) {
     }
   });
 });
+rides.get("/checkpassengerifhasactive/:id", function (req, res) {
+  console.log("Sd");
+  var appData = {};
+  // console.log("checkifleft");
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT * FROM rideinfo join ride on rideinfo.RideID=ride.RideID where ride.isActive=1 and rideinfo.StatusID=1 and PassengerID=?",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            if (rows.length > 0) {
+              appData["error"] = 1;
+              appData[
+                "data"
+              ] = `You already have an active ride! Go to Ride History screen to view status of active rides!`;
+              res.status(200).json(appData);
+              console.log(appData);
+            } else {
+              appData["error"] = 0;
+              appData["data"] = "Grant access";
+              res.status(200).json(appData);
+              console.log(appData);
+            }
+          } else {
+            appData["error"] = -1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 rides.get("/getuniqueallwithcolumns/:id", function (req, res) {
   var appData = {};
+  console.log("API HIT");
   // var emailID = req.body.emailID;
   database.connection.getConnection(function (err, connection) {
     if (err) {
@@ -782,7 +838,7 @@ rides.get("/riderequests/:driveruserid", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT driver.driverID, driver.DriverUserID, ridenegotiation.driverFare, ridenegotiation.userID, ridenegotiation.userFare, ride.RideID, ridenegotiation.location,user.userid, user.firstName, user.lastName, ridenegotiation.latitude,ridenegotiation.longitude, driver_location.latitude as dLatitude, driver_location.longitude as drLongitude, driver_location.location as DriverfLocation,driver_location_to.to_longitude,driver_location_to.to_latitude, driver_location_to.to_location FROM driver join ride ON driver.DriverID = ride.DriverID join ridenegotiation on ridenegotiation.rideID = ride.RideID join user on ridenegotiation.userid = user.userID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID  where driver.DriverUserID = ?",
+        "SELECT driver.driverID, driver.DriverUserID, ridenegotiation.driverFare, ridenegotiation.userID, ridenegotiation.userFare, ride.RideID, ridenegotiation.location,user.userid, user.firstName, user.lastName, ridenegotiation.latitude,ridenegotiation.longitude, driver_location.latitude as dLatitude, driver_location.longitude as drLongitude, driver_location.location as DriverfLocation,driver_location_to.to_longitude,driver_location_to.to_latitude, driver_location_to.to_location FROM driver join ride ON driver.DriverID = ride.DriverID join ridenegotiation on ridenegotiation.rideID = ride.RideID join user on ridenegotiation.userid = user.userID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID  where driver.DriverUserID = ? AND ride.datetime > CONVERT_TZ(NOW(), 'UTC', 'Asia/Karachi')",
         [req.params.driveruserid],
         function (err, rows, fields) {
           if (!err) {
@@ -1002,7 +1058,7 @@ rides.get("/forably/:id", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT rideinfo.RideID, rideinfo.PassengerID,rideinfo.DriverID,rideinfo.fareDecided,user.firstName, user.lastName,user.phone,driver_location_to.to_latitude as DestLat,driver_location_to.to_longitude as DestLong,driver_location_to.to_location as DestLocation FROM rideinfo join user on user.userID=rideinfo.DriverID join ride on rideinfo.RideID=ride.RideID join driver_location_to on rideinfo.RideID=driver_location_to.rideID where rideinfo.StatusID=1 and rideinfo.PassengerID=? and ride.status!=1;",
+        "SELECT rideinfo.RideID, rideinfo.PassengerID,rideinfo.DriverID,rideinfo.fareDecided,user.firstName, user.lastName,user.phone,driver_location_to.to_latitude as DestLat,driver_location_to.to_longitude as DestLong,driver_location_to.to_location as DestLocation FROM rideinfo join user on user.userID=rideinfo.DriverID join ride on rideinfo.RideID=ride.RideID join driver_location_to on rideinfo.RideID=driver_location_to.rideID where rideinfo.StatusID=1 and rideinfo.PassengerID=? and ride.status!=1 and ride.isActive=1",
         [req.params.id],
         function (err, rows, fields) {
           if (rows.length > 0) {
@@ -1026,6 +1082,7 @@ rides.get("/forably/:id", function (req, res) {
 
 rides.get("/getridesformodal/:id", function (req, res) {
   var appData = {};
+  console.log("getridesformodal");
   // var emailID = req.body.emailID;
   database.connection.getConnection(function (err, connection) {
     if (err) {
@@ -1034,7 +1091,7 @@ rides.get("/getridesformodal/:id", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT ride.RideID, driver.DriverUserID, user.firstName, user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID  where driver.DriverUserID = ? and ride.status=0",
+        "SELECT ride.RideID, ride.datetime, driver.DriverUserID, user.firstName, user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID where driver.DriverUserID = ? and ride.status=0 and ride.isActive=0 AND ride.datetime > CONVERT_TZ(NOW(), 'UTC', 'Asia/Karachi')",
         [req.params.id],
         function (err, rows, fields) {
           if (!err) {
@@ -1055,5 +1112,118 @@ rides.get("/getridesformodal/:id", function (req, res) {
     }
   });
 });
+rides.get("/getdriverscompletedrides/:id", function (req, res) {
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT ride.RideID, driver.DriverUserID, user.firstName, user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID where driver.DriverUserID = ? and ride.status=1",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.get("/getdriversactiverides/:id", function (req, res) {
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT ride.RideID, driver.DriverUserID, user.firstName, user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID where driver.DriverUserID = ? and ride.isACtive=1",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.get("/handleActiveRide/:rideid/:userid", function (req, res) {
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT * from ride join driver on driver.DriverID=ride.DriverID where ride.isActive=1 and ride.status=0 and driver.DriverUserID=?",
+        [req.params.userid],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            console.log("ROWS", rows);
+            if (rows.length > 0) {
+              appData["error"] = 2;
+              appData["data"] = "You already have one active ride!";
+              res.status(200).json(appData);
+            } else {
+              connection.query(
+                "UPDATE ride SET isActive=1 WHERE RideID=?",
+                [req.params.rideid],
+                function (err, rows, fields) {
+                  if (!err) {
+                    appData["data"] = `Sucessfully updated row: ${rows}`;
+                    res.status(200).json(appData);
+                  } else {
+                    appData["error"] = -1;
+                    appData["data"] = "Error in updating";
+                    res.status(204).json(appData);
+                  }
+                }
+              );
+            }
 
+            console.log(rows);
+            console.log(appData);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 module.exports = rides;

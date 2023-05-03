@@ -110,7 +110,25 @@ driver.post("/createnewridefpass", function (req, res) {
       console.log(err);
     } else {
       connection.query(
-        "INSERT INTO ride (DriverID, numberOfPeople, fareEntered, vehicleID,status) VALUES (?,4,?,?,0)",
+        "UPDATE ridereqpassenger SET status=2 WHERE idridereqpassenger=?",
+        [idx],
+        function (err, rows, fields) {
+          if (!err) {
+            console.log("in first");
+            appData.error = 0;
+            appData["data"] = "Row updated!";
+            // res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            console.log("in second");
+            appData["data"] = "Error Occured!";
+            // res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.query(
+        "INSERT INTO ride (DriverID, numberOfPeople, fareEntered, vehicleID,status,datetime, isActive) VALUES (?,4,?,?,0,DATE_FORMAT(DATE_ADD(CONVERT_TZ(NOW(), 'UTC', 'Asia/Karachi'), INTERVAL 20 MINUTE), '%Y-%m-%dT%H:%i:%s.000Z'),0)",
         [did, passridedata[0].fare, passridedata[0].vehicleID],
         function (err, rows, fields) {
           if (!err) {
@@ -208,6 +226,24 @@ driver.post("/createnewridefpass", function (req, res) {
                       } else {
                         appData["data"] = "Error Occured!";
                         res.status(400).json(appData);
+                        console.log(err);
+                      }
+                    }
+                  );
+                  connection.query(
+                    "DELETE FROM ridereqpassenger idridereqpassenger=?",
+                    [idx],
+                    function (err, rows, fields) {
+                      if (!err) {
+                        console.log("in first");
+                        appData.error = 0;
+                        appData["data"] = "Row updated!";
+                        // res.status(201).json(appData);
+                        console.log(appData);
+                      } else {
+                        console.log("in second");
+                        appData["data"] = "Error Occured!";
+                        // res.status(400).json(appData);
                         console.log(err);
                       }
                     }
