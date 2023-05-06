@@ -43,9 +43,60 @@ landmarks.get("/:lat/:long", function (req, res) {
             appData["error"] = 0;
 
             for (let i = 0; i < rows.length; i++) {
+              calcdistance.push(
+                distance(
+                  req.params.lat,
+                  req.params.long,
+                  rows[i].Latitude,
+                  rows[i].Longitude,
+                  rows[i].Name
+                )
+              );
+              //   shortest = calcdistance;
+            }
+            const min = calcdistance.indexOf(Math.min(...calcdistance));
+            appData["latitude"] = rows[min].Latitude;
+            appData["longitude"] = rows[min].Longitude;
+            appData["placename"] = rows[min].Name;
+            appData["distance"] = Math.min(...calcdistance);
+            res.status(200).json(appData);
+            // console.log(appData.data);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+landmarks.get("/", function (req, res) {
+  console.log(req.query);
+  var appData = {};
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT Name, Latitude, Longitude FROM nearestlandmark",
+        [req.params.lat],
+        function (err, rows, fields) {
+          if (!err) {
+            var calcdistance = [];
+            // var shortest = 0;
+            appData["error"] = 0;
+
+            for (let i = 0; i < rows.length; i++) {
               const distanceCalculated = distance(
-                req.params.lat,
-                req.params.long,
+                req.query.lat,
+                req.query.long,
                 rows[i].Latitude,
                 rows[i].Longitude,
                 rows[i].Name
