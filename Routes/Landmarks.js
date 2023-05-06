@@ -43,22 +43,27 @@ landmarks.get("/:lat/:long", function (req, res) {
             appData["error"] = 0;
 
             for (let i = 0; i < rows.length; i++) {
-              calcdistance.push(
-                distance(
-                  req.params.lat,
-                  req.params.long,
-                  rows[i].Latitude,
-                  rows[i].Longitude,
-                  rows[i].Name
-                )
+              const distanceCalculated = distance(
+                req.params.lat,
+                req.params.long,
+                rows[i].Latitude,
+                rows[i].Longitude,
+                rows[i].Name
               );
+              if (distanceCalculated < 5) {
+                // const createJson=`{}`
+                rows[i]["distance"] = distanceCalculated;
+                calcdistance.push(rows[i]);
+              }
               //   shortest = calcdistance;
             }
-            const min = calcdistance.indexOf(Math.min(...calcdistance));
-            appData["latitude"] = rows[min].Latitude;
-            appData["longitude"] = rows[min].Longitude;
-            appData["placename"] = rows[min].Name;
-            appData["distance"] = Math.min(...calcdistance);
+            const sortedArray = calcdistance.sort((a, b) => {
+              return a.distance - b.distance;
+            });
+            appData["details"] = sortedArray;
+            // appData["longitude"] = rows[min].Longitude;
+            // appData["placename"] = rows[min].Name;
+            // appData["distance"] = Math.min(...calcdistance);
             res.status(200).json(appData);
             // console.log(appData.data);
           } else {

@@ -842,10 +842,11 @@ rides.get("/riderequests/:driveruserid", function (req, res) {
         [req.params.driveruserid],
         function (err, rows, fields) {
           if (!err) {
+            console.log(rows);
             appData["error"] = 0;
             appData["data"] = rows;
-            console.log(rows[0].RideID);
-            console.log(rows[0].userID);
+            // console.log(rows[0].RideID);
+            // console.log(rows[0].userID);
             var filteredRows = [];
             var count = 0;
             for (let i = 0; i < rows.length; i++) {
