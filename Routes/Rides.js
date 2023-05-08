@@ -686,6 +686,7 @@ rides.get("/checkpassengerifhasactive/:id", function (req, res) {
         [req.params.id],
         function (err, rows, fields) {
           if (!err) {
+            console.log(rows);
             if (rows.length > 0) {
               appData["error"] = 1;
               appData[
