@@ -5,13 +5,7 @@ var cors = require("cors");
 const Pusher = require("pusher");
 
 landmarks.use(cors());
-const pusher = new Pusher({
-  appId: "1582876",
-  key: "6bef1447bb8ee1d2d03f",
-  secret: "c893dc43c9827e897393",
-  cluster: "ap2",
-  useTLS: true,
-});
+
 function distance(lat1, lon1, lat2, lon2, name) {
   var p = 0.017453292519943295; // Math.PI / 180
   var c = Math.cos;
@@ -77,6 +71,7 @@ landmarks.get("/:lat/:long", function (req, res) {
 landmarks.get("/", function (req, res) {
   console.log(req.query);
   var appData = {};
+  var isGranted = 0;
   // var emailID = req.body.emailID;
   database.connection.getConnection(function (err, connection) {
     if (err) {
@@ -85,48 +80,71 @@ landmarks.get("/", function (req, res) {
       res.status(500).json(appData);
     } else {
       connection.query(
-        "SELECT Name, Latitude, Longitude FROM nearestlandmark",
-        [req.params.lat],
+        "Select * from businessUsers where api_key=?",
+        [req.query.access_token],
         function (err, rows, fields) {
           if (!err) {
-            var calcdistance = [];
-            // var shortest = 0;
-            appData["error"] = 0;
+            console.log(rows.length);
+            if (rows.length > 0) {
+              console.log("insiide > 0");
+              connection.query(
+                "SELECT Name, Latitude, Longitude FROM nearestlandmark",
+                [req.query.lat],
+                function (err, rows, fields) {
+                  if (!err) {
+                    var calcdistance = [];
+                    // var shortest = 0;
+                    appData["error"] = 0;
 
-            for (let i = 0; i < rows.length; i++) {
-              const distanceCalculated = distance(
-                req.query.lat,
-                req.query.long,
-                rows[i].Latitude,
-                rows[i].Longitude,
-                rows[i].Name
+                    for (let i = 0; i < rows.length; i++) {
+                      const distanceCalculated = distance(
+                        req.query.lat,
+                        req.query.long,
+                        rows[i].Latitude,
+                        rows[i].Longitude,
+                        rows[i].Name
+                      );
+                      if (distanceCalculated < 5) {
+                        // const createJson=`{}`
+                        rows[i]["distance"] = distanceCalculated;
+                        calcdistance.push(rows[i]);
+                      }
+                      //   shortest = calcdistance;
+                    }
+                    const sortedArray = calcdistance.sort((a, b) => {
+                      return a.distance - b.distance;
+                    });
+                    appData["details"] = sortedArray;
+                    // appData["longitude"] = rows[min].Longitude;
+                    // appData["placename"] = rows[min].Name;
+                    // appData["distance"] = Math.min(...calcdistance);
+                    res.status(200).json(appData);
+                    // console.log(appData.data);
+                  } else {
+                    appData["error"] = 1;
+                    appData["data"] = "No data found";
+                    res.status(204).json(appData);
+                    console.log(err);
+                    // console.log(res);
+                  }
+                }
               );
-              if (distanceCalculated < 5) {
-                // const createJson=`{}`
-                rows[i]["distance"] = distanceCalculated;
-                calcdistance.push(rows[i]);
-              }
-              //   shortest = calcdistance;
+              connection.release();
+            } else {
+              console.log("Are you inside");
+              appData["error"] = 1;
+              appData["data"] =
+                "You're not authorised. Please enter valid API_KEY";
+              res.status(200).json(appData);
             }
-            const sortedArray = calcdistance.sort((a, b) => {
-              return a.distance - b.distance;
-            });
-            appData["details"] = sortedArray;
-            // appData["longitude"] = rows[min].Longitude;
-            // appData["placename"] = rows[min].Name;
-            // appData["distance"] = Math.min(...calcdistance);
-            res.status(200).json(appData);
-            // console.log(appData.data);
           } else {
             appData["error"] = 1;
             appData["data"] = "No data found";
             res.status(204).json(appData);
             console.log(err);
-            // console.log(res);
           }
         }
       );
-      connection.release();
     }
   });
 });

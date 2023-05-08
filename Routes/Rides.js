@@ -204,6 +204,7 @@ rides.post("/addnew", function (req, res) {
   const vehicleID = req.body.vehicleID;
   const status = 0;
   const datetime = req.body.datetime;
+  const isActive = 0;
   var userData = {
     DriverID: req.body.DriverID,
     numberOfPeople: req.body.numberOfPeople,
@@ -219,8 +220,16 @@ rides.post("/addnew", function (req, res) {
       console.log(appData);
     } else {
       connection.query(
-        "INSERT INTO ride (DriverID, numberOfPeople, fareEntered, vehicleID,status,datetime) VALUES (?,?,?,?,?,?)",
-        [DriverID, numberOfPeople, fareEntered, vehicleID, status, datetime],
+        "INSERT INTO ride (DriverID, numberOfPeople, fareEntered, vehicleID,status,datetime,isActive) VALUES (?,?,?,?,?,?,?)",
+        [
+          DriverID,
+          numberOfPeople,
+          fareEntered,
+          vehicleID,
+          status,
+          datetime,
+          isActive,
+        ],
         function (err, rows, fields) {
           if (!err) {
             appData.error = 0;

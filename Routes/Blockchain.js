@@ -225,29 +225,63 @@ blockchain.post("/pushcode", function (req, res) {
 // //     console.log(`Asset was sent to address ${result[0]}`);
 // //   }
 // // );
+blockchain.get("/getReferrals", function (req, res) {
+  console.log(req.query);
+  var appData = {};
+  var isGranted = 0;
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "Select * from businessUsers where api_key=?",
+        [req.query.access_token],
+        function (err, rows, fields) {
+          if (!err) {
+            console.log(rows.length);
+            if (rows.length > 0) {
+              console.log("insiide > 0");
+              multichain.listAssets((err, response) => {
+                const substr = req.query.email;
+                if (err) {
+                  console.log("Error:", err);
+                } else {
+                  // console.log("LIST ASSETS", response);
+                  let count = 0;
+                  for (let i = 0; i < response.length; i++) {
+                    let str = response[i].name.toString();
+                    if (str.includes(substr)) {
+                      console.log(str);
+                      count = count + 1;
+                    }
+                  }
+                  appData["error"] = 0;
+                  appData["details"] = count;
+                  console.log("APPDATA", appData);
+                  res.status(200).json(appData);
+                }
+              });
 
-const txid = "19d868dc2f0f113d51478a67908f16e8c620f0c6529463a2d352b8322e08a8ae";
-const vout = 0;
-multichain.getRawTransaction({ txid: txid, vout: vout }, (err, data) => {
-  if (err) {
-    console.error("ERRRRRRRR", err);
-  } else {
-    console.log(data);
-    multichain.decodeRawTransaction({ hexstring: data }, (err, decoded) => {
-      if (err) {
-        console.log("ERRindecode", err);
-      } else {
-        console.log("code", decoded.issue.details.code);
-        console.log(
-          "DECODED to address",
-          decoded.vout[0].scriptPubKey.addresses[0]
-        );
-        console.log(
-          "DECODED from address",
-          decoded.vout[2].scriptPubKey.addresses[0]
-        );
-      }
-    });
-  }
+              connection.release();
+            } else {
+              console.log("Are you inside");
+              appData["error"] = 1;
+              appData["data"] =
+                "You're not authorised. Please enter valid API_KEY";
+              res.status(200).json(appData);
+            }
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+          }
+        }
+      );
+    }
+  });
 });
 module.exports = blockchain;
