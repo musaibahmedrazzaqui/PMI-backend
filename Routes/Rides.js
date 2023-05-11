@@ -1237,4 +1237,189 @@ rides.get("/handleActiveRide/:rideid/:userid", function (req, res) {
     }
   });
 });
+
+rides.get("/getpassengerscheduledrides/:id", function (req, res) {
+  var appData = {};
+  // console.log("getridesformodal");
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT ride.RideID, ride.datetime, driver.DriverUserID, user.firstName, user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.location, driver_location_to.to_status, driver_location_to.to_location, ridenegotiation.location as PassLocation FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join ridenegotiation on ride.RideID =ridenegotiation.rideID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID and ridenegotiation.userID=? and ride.status=0 and ride.isActive=0 AND ride.datetime > CONVERT_TZ(NOW(), 'UTC', 'Asia/Karachi') and ride.RideID NOT IN(Select RideID from rideinfo where PassengerID=?)",
+        [req.params.id, req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.get("/getpassengeracceptedrides/:id", function (req, res) {
+  var appData = {};
+  // console.log("getridesformodal");
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT ride.RideID, driver.DriverUserID, user.firstName, ridenegotiation.location as PassLocation,user.lastName, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, ride.datetime,driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID join ridenegotiation on ridenegotiation.rideID =ride.RideID join rideinfo on rideinfo.RideID=ride.RideID where rideinfo.PassengerID = ? and ride.isActive=0 and ride.datetime > CONVERT_TZ(NOW(), 'UTC', 'Asia/Karachi')",
+        [req.params.id, req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.get("/getpassengeractiverides/:id", function (req, res) {
+  var appData = {};
+  // console.log("getridesformodal");
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "SELECT ride.RideID, rideinfo.PassengerID,driver.DriverUserID, user.firstName, user.lastName, rideinfo.fareDecided, ride.DriverID, ride.numberOfPeople, ride.fareEntered, ride.vehicleID, vehicle.Manufacturer, vehicle.Model, vehicle.Year, driver_location.status, driver_location.location, driver_location_to.to_status, driver_location_to.to_location FROM ride join vehicle ON ride.vehicleID = vehicle.vehicleID join driver_location ON ride.RideID=driver_location.RideID join driver_location_to ON ride.RideID = driver_location_to.RideID join driver ON ride.DriverID = driver.DriverID join user ON driver.DriverUserID = user.userID join rideinfo on rideinfo.RideID=ride.RideID where rideinfo.PassengerID=? and ride.isActive=1",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+
+rides.get("/getpassengercompletedrides/:id", function (req, res) {
+  var appData = {};
+  // console.log("getridesformodal");
+  // var emailID = req.body.emailID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "Select ride.RideID, ride.vehicleID,ride.status, rideinfo.idRideInfo,ride.datetime, rideinfo.DriverID,user.firstName, user.lastName, user.phone,rideinfo.StatusID,ride.isActive,rideinfo.fareDecided,vehicle.Manufacturer,vehicle.Model,vehicle.Year,driver_location.latitude,driver_location.longitude,driver_location.location,driver_location_to.to_latitude,driver_location_to.to_longitude,driver_location_to.to_location,ridenegotiation.latitude as PassLat, ridenegotiation.longitude as PassLong, ridenegotiation.location as PassLocation,ridenegotiation.ridenegotiationId from ride join rideinfo on rideinfo.RideID=ride.RideID join vehicle on ride.vehicleID=vehicle.vehicleID join driver_location on ride.RideID =driver_location.RideID join ridenegotiation on ridenegotiation.rideID=ride.RideID join driver_location_to on ride.RideID =driver_location_to.RideID join user on user.userID=rideinfo.DriverID where rideinfo.PassengerID=? and ride.status=1 order by rideinfo.StatusID desc",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            appData["error"] = 0;
+            appData["data"] = rows;
+            res.status(200).json(appData);
+            console.log(rows);
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+            // console.log(res);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
+rides.post("/addtoafterride", function (req, res) {
+  var appData = {};
+  // console.log("getridesformodal");
+  // var emailID = req.body.emailID;
+  const flag = req.body.flag;
+  const comments = req.body.comment;
+  const to_id = req.body.to_id;
+  const from_id = req.body.from_id;
+  const rideID = req.body.rideID;
+  database.connection.getConnection(function (err, connection) {
+    if (err) {
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+    } else {
+      connection.query(
+        "Select * from afterRide where to_id=? and from_id=? and rideID=?",
+        [to_id, from_id, rideID],
+        function (err, rows, fields) {
+          if (!err) {
+            if (rows.length > 0) {
+              appData["error"] = -1;
+              appData["data"] = "Already existed";
+              res.status(200).json(appData);
+              // console.log(rows);
+            } else {
+              connection.query(
+                "Insert into afterRide (to_id,from_id,flag,comments,rideID) VALUES (?,?,?,?,?)",
+                [to_id, from_id, flag, comments, rideID],
+                function (err, rows, fields) {
+                  if (!err) {
+                    appData["error"] = 0;
+                    appData["data"] = rows;
+                    res.status(200).json(appData);
+                    console.log(rows);
+                  } else {
+                    console.log(err);
+                    // console.log(res);
+                  }
+                }
+              );
+            }
+          } else {
+            appData["error"] = 1;
+            appData["data"] = "No data found";
+            res.status(204).json(appData);
+            console.log(err);
+          }
+        }
+      );
+
+      connection.release();
+    }
+  });
+});
 module.exports = rides;
