@@ -103,7 +103,7 @@ business.post("/login", function (req, res) {
       console.log(err);
     } else {
       connection.query(
-        "SELECT * FROM businessUsers WHERE emailID = ?",
+        "SELECT * FROM businessUsers WHERE email = ?",
         [emailID],
         function (err, rows, fields) {
           if (err) {
