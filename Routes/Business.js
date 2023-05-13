@@ -13,15 +13,9 @@ business.post("/register", function (req, res) {
     data: "",
   };
   // const userID = 2;
-  const VehicleNumber = req.body.VehicleNumber;
-  const EngineNumber = 0;
-  const RegistrationProvince = req.body.RegistrationProvince;
-  const OwnerName = req.body.OwnerName;
-  const Manufacturer = req.body.Manufacturer;
-  const Model = req.body.Model;
-  const Year = req.body.Year;
-  const EngineCC = req.body.EngineCC;
-  const DriverID = req.body.DriverID;
+  const Name = req.body.name;
+  const email = req.body.email;
+  const password = req.body.password;
   database.connection.getConnection(function (err, connection) {
     // console.log(userData);
     if (err) {
@@ -31,22 +25,12 @@ business.post("/register", function (req, res) {
       console.log(err);
     } else {
       connection.query(
-        "INSERT INTO vehicle (VehicleNumber, EngineNumber, RegistrationProvince, OwnerName,Manufacturer,Model,Year,EngineCC, DriverID) VALUES (?,?,?,?,?,?,?,?,?)",
-        [
-          VehicleNumber,
-          EngineNumber,
-          RegistrationProvince,
-          OwnerName,
-          Manufacturer,
-          Model,
-          Year,
-          EngineCC,
-          DriverID,
-        ],
+        "INSERT INTO businessUsers (Name,email,password) VALUES (?,?,?",
+        [Name, email, password],
         function (err, rows, fields) {
           if (!err) {
             appData.error = 0;
-            appData["data"] = "Driver registered successfully!";
+            appData["data"] = "User registered successfully!";
             res.status(201).json(appData);
           } else {
             appData["data"] = "Error Occured!";
@@ -59,30 +43,40 @@ business.post("/register", function (req, res) {
     }
   });
 });
+business.get("/addapi/:id/:apikey", function (req, res) {
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  console.log("neeche");
+  // const userID = 2;
+  // const email = req.body.email;
 
-business.get("/:id", function (req, res) {
-  var appData = {};
-  // var emailID = req.body.emailID;
   database.connection.getConnection(function (err, connection) {
+    // console.log(userData);
     if (err) {
+      console.log("in error");
       appData["error"] = 1;
       appData["data"] = "Internal Server Error";
       res.status(500).json(appData);
+      console.log(appData);
     } else {
+      console.log("HERE");
       connection.query(
-        "SELECT * FROM vehicle where DriverID = ?",
-        [req.params.id],
+        "UPDATE businessUsers SET api_key=? where email=?",
+        [req.params.id, req.params.apikey],
         function (err, rows, fields) {
           if (!err) {
-            appData["error"] = 0;
-            appData["data"] = rows;
-            res.status(200).json(appData);
-            console.log(rows);
+            console.log("in first");
+            appData.error = 0;
+            appData["data"] = "Row updated!";
+            res.status(201).json(appData);
+            console.log(appData);
           } else {
-            appData["data"] = "No data found";
-            res.status(204).json(appData);
+            console.log("in second");
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
             console.log(err);
-            // console.log(res);
           }
         }
       );
@@ -90,6 +84,7 @@ business.get("/:id", function (req, res) {
     }
   });
 });
+
 business.post("/login", function (req, res) {
   var appData = {};
   var emailID = req.body.emailID;
@@ -133,7 +128,7 @@ business.post("/login", function (req, res) {
             } else {
               appData.error = 2;
               appData["data"] = "Email does not exists!";
-              res.status(204).json(appData);
+              res.status(200).json(appData);
               console.log(rows);
             }
             console.log(appData);
