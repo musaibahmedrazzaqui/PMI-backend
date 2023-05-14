@@ -49,7 +49,8 @@ business.get("/addapi/:id/:apikey", function (req, res) {
     error: 1,
     data: "",
   };
-  console.log("neeche");
+  console.log("neeche", req.params.apikey);
+
   // const userID = 2;
   // const email = req.body.email;
 
