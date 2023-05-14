@@ -25,7 +25,7 @@ business.post("/register", function (req, res) {
       console.log(err);
     } else {
       connection.query(
-        "INSERT INTO businessUsers (Name,email,password) VALUES (?,?,?",
+        "INSERT INTO businessUsers (Name,email,password) VALUES (?,?,?)",
         [Name, email, password],
         function (err, rows, fields) {
           if (!err) {
