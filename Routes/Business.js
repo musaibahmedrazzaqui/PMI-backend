@@ -33,6 +33,7 @@ business.post("/register", function (req, res) {
             appData["data"] = "User registered successfully!";
             res.status(201).json(appData);
           } else {
+            appData["error"] = 2;
             appData["data"] = "Error Occured!";
             res.status(400).json(appData);
             console.log(err);
