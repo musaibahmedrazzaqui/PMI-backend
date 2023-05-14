@@ -49,7 +49,7 @@ business.get("/addapi/:id/:apikey", function (req, res) {
     error: 1,
     data: "",
   };
-  console.log("neeche", req.params.apikey);
+  console.log("neeche", req.params);
 
   // const userID = 2;
   // const email = req.body.email;
@@ -63,10 +63,10 @@ business.get("/addapi/:id/:apikey", function (req, res) {
       res.status(500).json(appData);
       console.log(appData);
     } else {
-      console.log("HERE");
+      console.log("HERE", req.params.apikey);
       connection.query(
         "UPDATE businessUsers SET api_key=? where email=?",
-        [req.params.id, req.params.apikey],
+        [req.params.apikey, req.params.id],
         function (err, rows, fields) {
           if (!err) {
             console.log("in first");
@@ -86,7 +86,48 @@ business.get("/addapi/:id/:apikey", function (req, res) {
     }
   });
 });
+business.get("/getuser/:id", function (req, res) {
+  var appData = {
+    error: 1,
+    data: "",
+  };
+  console.log("neeche", req.params);
 
+  // const userID = 2;
+  // const email = req.body.email;
+
+  database.connection.getConnection(function (err, connection) {
+    // console.log(userData);
+    if (err) {
+      console.log("in error");
+      appData["error"] = 1;
+      appData["data"] = "Internal Server Error";
+      res.status(500).json(appData);
+      console.log(appData);
+    } else {
+      console.log("HERE", req.params.apikey);
+      connection.query(
+        "Select * from businessUsers where email=?",
+        [req.params.id],
+        function (err, rows, fields) {
+          if (!err) {
+            console.log("in first");
+            appData.error = 0;
+            appData["data"] = rows;
+            res.status(201).json(appData);
+            console.log(appData);
+          } else {
+            console.log("in second");
+            appData["data"] = "Error Occured!";
+            res.status(400).json(appData);
+            console.log(err);
+          }
+        }
+      );
+      connection.release();
+    }
+  });
+});
 business.post("/login", function (req, res) {
   var appData = {};
   var emailID = req.body.emailID;
