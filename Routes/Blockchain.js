@@ -303,64 +303,89 @@ blockchain.get("/getcreditscore", function (req, res) {
         referralCount = 0;
       }
       database.connection.getConnection(function (err, connection) {
-        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAA");
         if (err) {
           appData["error"] = 1;
           appData["data"] = "Internal Server Error";
           res.status(500).json(appData);
         } else {
           connection.query(
-            "SELECT * from user",
-            [req.query.email],
+            "Select * from businessUsers where api_key=?",
+            [req.query.access_token],
             function (err, rows, fields) {
-              let numberOfUsers = rows.length;
-              let referralRate = referralCount / numberOfUsers;
-              console.log("ReferralRate", referralRate);
-              connection.query(
-                "Select * from afterRide join user on afterRide.to_id=user.userID where to_id=38 and user.emailID=? and flag=0",
-                [req.query.email],
-                function (err, rows, fields) {
-                  let happyFaces = rows.length;
+              if (!err) {
+                console.log(rows.length);
+                if (rows.length > 0) {
+                  console.log("insiide > 0");
                   connection.query(
-                    "Select * from afterRide join user on afterRide.to_id=user.userID where user.emailID=?",
+                    "SELECT * from user",
                     [req.query.email],
                     function (err, rows, fields) {
-                      let totalReviews = rows.length;
-                      let happyRate = happyFaces / totalReviews;
-                      if (!happyRate) {
-                        happyRate = 0;
-                      }
-                      console.log("HAppyRate", happyRate);
+                      let numberOfUsers = rows.length;
+                      let referralRate = referralCount / numberOfUsers;
+                      console.log("ReferralRate", referralRate);
                       connection.query(
-                        "Select * from afterRide join user on afterRide.to_id=user.userID where to_id=38 and user.emailID=? and flag=1",
+                        "Select * from afterRide join user on afterRide.to_id=user.userID where to_id=38 and user.emailID=? and flag=0",
                         [req.query.email],
                         function (err, rows, fields) {
-                          let sadFaces = rows.length;
-                          let sadRate = sadFaces / totalReviews;
-                          if (!sadRate) {
-                            sadRate = 0;
-                          }
-                          console.log("HAppyRate", sadRate);
-                          let creditScore =
-                            (0.5 * referralRate +
-                              0.25 * happyRate +
-                              0.25 * sadRate +
-                              0.2) *
-                            100;
-                          appData["error"] = 0;
-                          appData["data"] = creditScore;
-                          console.log("appdata", appData);
-                          res.status(200).json(appData);
+                          let happyFaces = rows.length;
+                          connection.query(
+                            "Select * from afterRide join user on afterRide.to_id=user.userID where user.emailID=?",
+                            [req.query.email],
+                            function (err, rows, fields) {
+                              let totalReviews = rows.length;
+                              let happyRate = happyFaces / totalReviews;
+                              if (!happyRate) {
+                                happyRate = 0;
+                              }
+                              console.log("HAppyRate", happyRate);
+                              connection.query(
+                                "Select * from afterRide join user on afterRide.to_id=user.userID where to_id=38 and user.emailID=? and flag=1",
+                                [req.query.email],
+                                function (err, rows, fields) {
+                                  let sadFaces = rows.length;
+                                  let sadRate = sadFaces / totalReviews;
+                                  if (!sadRate) {
+                                    sadRate = 0;
+                                  }
+                                  console.log("HAppyRate", sadRate);
+                                  let creditScore =
+                                    (0.5 * referralRate +
+                                      0.25 * happyRate +
+                                      0.25 * sadRate +
+                                      0.2) *
+                                    100;
+                                  appData["error"] = 0;
+                                  appData["data"] = creditScore;
+                                  console.log("appdata", appData);
+                                  res.status(200).json(appData);
+                                }
+                              );
+                            }
+                          );
                         }
                       );
                     }
                   );
+                  connection.release();
+
+                  // connection.release();
+                } else {
+                  console.log("Are you inside");
+                  appData["error"] = 1;
+                  appData["data"] =
+                    "You're not authorised. Please enter valid API_KEY";
+                  res.status(200).json(appData);
                 }
-              );
+              } else {
+                appData["error"] = 1;
+                appData["data"] = "No data found";
+                res.status(204).json(appData);
+                console.log(err);
+              }
             }
           );
-          connection.release();
         }
+        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAA");
       });
     });
 
