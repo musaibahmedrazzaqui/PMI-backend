@@ -182,4 +182,5 @@ business.post("/login", function (req, res) {
     }
   });
 });
+
 module.exports = business;

@@ -2,7 +2,7 @@ const express = require("express");
 var blockchain = express.Router();
 var database = require("../Database/database");
 var cors = require("cors");
-
+const axios = require("axios");
 blockchain.use(cors());
 console.log("SSSSSSSSS");
 const multichain = require("multichain-node")({
@@ -283,5 +283,87 @@ blockchain.get("/getReferrals", function (req, res) {
       );
     }
   });
+});
+async function getReferrals(email) {
+  return referralCount;
+}
+blockchain.get("/getcreditscore", function (req, res) {
+  console.log(req.query);
+  var appData = {};
+  // let referralCount;
+  let referralCount;
+  axios
+    .get(
+      `https://pmi-backend-production.up.railway.app/blockchain/getReferrals?email=${req.query.email}&access_token=dasrttsds`
+    )
+    .then((response) => {
+      console.log(response.data.details);
+      referralCount = response.data.details;
+      if ((response.data.details = undefined)) {
+        referralCount = 0;
+      }
+      database.connection.getConnection(function (err, connection) {
+        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        if (err) {
+          appData["error"] = 1;
+          appData["data"] = "Internal Server Error";
+          res.status(500).json(appData);
+        } else {
+          connection.query(
+            "SELECT * from user",
+            [req.query.email],
+            function (err, rows, fields) {
+              let numberOfUsers = rows.length;
+              let referralRate = referralCount / numberOfUsers;
+              console.log("ReferralRate", referralRate);
+              connection.query(
+                "Select * from afterRide join user on afterRide.to_id=user.userID where to_id=38 and user.emailID=? and flag=0",
+                [req.query.email],
+                function (err, rows, fields) {
+                  let happyFaces = rows.length;
+                  connection.query(
+                    "Select * from afterRide join user on afterRide.to_id=user.userID where user.emailID=?",
+                    [req.query.email],
+                    function (err, rows, fields) {
+                      let totalReviews = rows.length;
+                      let happyRate = happyFaces / totalReviews;
+                      if (!happyRate) {
+                        happyRate = 0;
+                      }
+                      console.log("HAppyRate", happyRate);
+                      connection.query(
+                        "Select * from afterRide join user on afterRide.to_id=user.userID where to_id=38 and user.emailID=? and flag=1",
+                        [req.query.email],
+                        function (err, rows, fields) {
+                          let sadFaces = rows.length;
+                          let sadRate = sadFaces / totalReviews;
+                          if (!sadRate) {
+                            sadRate = 0;
+                          }
+                          console.log("HAppyRate", sadRate);
+                          let creditScore =
+                            (0.5 * referralRate +
+                              0.25 * happyRate +
+                              0.25 * sadRate +
+                              0.2) *
+                            100;
+                          appData["error"] = 0;
+                          appData["data"] = creditScore;
+                          console.log("appdata", appData);
+                          res.status(200).json(appData);
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            }
+          );
+          connection.release();
+        }
+      });
+    });
+
+  // var emailID = req.body.emailID;
 });
 module.exports = blockchain;
